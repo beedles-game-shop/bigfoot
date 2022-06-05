@@ -78,4 +78,21 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
+
+    // Called when the player enters a trigger
+    private void OnTriggerEnter(Collider other)
+    {
+        Vector3 playerPosition = gameObject.transform.position;
+
+        // If the player enters the cave while holding an object,
+        // drop the object and make it un-grabbable
+        if (other.gameObject.tag == "Cave" && isHoldingObject)
+        {
+            isHoldingObject = false;
+            heldObject.transform.position = playerPosition + new Vector3(0, 0, grabRadius);
+            heldObject.GetComponent<BoxCollider>().enabled = true;
+            heldObject.GetComponent<Rigidbody>().isKinematic = false;
+            heldObject.tag = "Untagged";
+        }
+    }
 }
