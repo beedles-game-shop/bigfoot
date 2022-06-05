@@ -5,7 +5,6 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
-    public GameObject grabTrigger;
     public float speed = 1;
     public float grabRadius = 1;
 
