@@ -16,11 +16,11 @@ public class Sensor : MonoBehaviour
 
     [HideInInspector] public List<Transform> visibleTargets = new List<Transform>();
 
-    private SensorListener sensorListener;
+    private SensorListener[] sensorListeners;
 
     void Start()
     {
-        sensorListener = GetComponent<SensorListener>();
+        sensorListeners = GetComponents<SensorListener>();
         StartCoroutine("FindTargetsWithDelay", .2f);
     }
 
@@ -56,7 +56,10 @@ public class Sensor : MonoBehaviour
 
         if (visibleTargets.Count > 0)
         {
-            sensorListener.OnSpotted();
+            foreach (var sensorListener in sensorListeners)
+            {
+                sensorListener.OnSpotted();
+            }
         }
     }
 
