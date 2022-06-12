@@ -13,14 +13,14 @@ public class CamperController : MonoBehaviour, SensorListener
     private float secondsToRemainAlerted = 0.5f;
 
     // Start is called before the first frame update
-    void Start()
+    protected void Start()
     {
         renderer = transform.Find("Body").GetComponent<Renderer>();
         lastTimeAlertedSec = Time.realtimeSinceStartup;
     }
 
     // Update is called once per frame
-    void Update()
+    protected void Update()
     {
         if(Time.realtimeSinceStartup - lastTimeAlertedSec > secondsToRemainAlerted)
         {

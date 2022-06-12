@@ -25,7 +25,7 @@ public class Sensor : MonoBehaviour
     {
         if(transform.Find("EyePosition") == null)
         {
-            Debug.LogError("Camper does not have eye position!");
+            Debug.LogError("NPC does not have eye position!");
         }
 
         eyeTransform = transform.Find("EyePosition");
