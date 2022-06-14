@@ -65,7 +65,7 @@ public class Sensor : MonoBehaviour
 
         if (visibleTargets.Count > 0)
         {
-            sensorListener.OnSpotted();
+            sensorListener.OnSpotted(visibleTargets[0].transform.position);
         }
     }
 
@@ -83,5 +83,5 @@ public class Sensor : MonoBehaviour
 
 public interface SensorListener
 {
-    void OnSpotted();
+    void OnSpotted(Vector3 targetPosition);
 }
