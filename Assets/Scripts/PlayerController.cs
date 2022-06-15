@@ -55,9 +55,10 @@ public class PlayerController : MonoBehaviour
         {
             isHoldingObject = false;
             heldObject.transform.position = playerPosition + new Vector3(0, 0, grabRadius);
-            heldObject.GetComponent<BoxCollider>().enabled = true;
+            heldObject.GetComponent<Collider>().enabled = true;
             heldObject.GetComponent<Rigidbody>().isKinematic = false;
 
+            EventManager.TriggerEvent<ItemDropEvent>();
             return;
         }
 
@@ -72,8 +73,9 @@ public class PlayerController : MonoBehaviour
             {
                 isHoldingObject = true;
                 heldObject = reachableObjects[i].gameObject;
-                heldObject.GetComponent<BoxCollider>().enabled = false;
+                heldObject.GetComponent<Collider>().enabled = false;
                 heldObject.GetComponent<Rigidbody>().isKinematic = true;
+                EventManager.TriggerEvent<ItemGrabEvent, GameObject>(reachableObjects[i].gameObject);
             }
         }
     }
@@ -89,9 +91,12 @@ public class PlayerController : MonoBehaviour
         {
             isHoldingObject = false;
             heldObject.transform.position = playerPosition + new Vector3(0, 0, grabRadius);
-            heldObject.GetComponent<BoxCollider>().enabled = true;
+            heldObject.GetComponent<Collider>().enabled = true;
             heldObject.GetComponent<Rigidbody>().isKinematic = false;
             heldObject.tag = "Untagged";
+
+            EventManager.TriggerEvent<ItemDropEvent>();
+            EventManager.TriggerEvent<ItemCollectEvent, GameObject>(heldObject);
         }
     }
 }
