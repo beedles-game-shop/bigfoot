@@ -1,8 +1,7 @@
 using UnityEngine;
-using System.Collections;
-using UnityEditor;
 
 // https://github.com/SebLague/Field-of-View
+using UnityEditor;
 [CustomEditor (typeof (Sensor))]
 public class SensorEditor : Editor {
 

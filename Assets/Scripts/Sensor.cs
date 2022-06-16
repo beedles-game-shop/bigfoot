@@ -1,8 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.PackageManager;
 using UnityEngine;
-using UnityEngine.Events;
 
 // https://github.com/SebLague/Field-of-View
 [RequireComponent(typeof(SensorListener))]
