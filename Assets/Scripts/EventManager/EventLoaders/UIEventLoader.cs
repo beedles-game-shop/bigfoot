@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class UIEventLoader : MonoBehaviour
@@ -20,6 +21,7 @@ public class UIEventLoader : MonoBehaviour
     private UnityAction<GameObject> itemGrabListener;
     private UnityAction<GameObject> itemCollectListener;
     private UnityAction itemDropListener;
+    private UnityAction gameOverListener;
 
     void Awake()
     {   
@@ -27,6 +29,7 @@ public class UIEventLoader : MonoBehaviour
         itemGrabListener = new UnityAction<GameObject>(ItemGrabHandler);
         itemCollectListener = new UnityAction<GameObject>(ItemCollectHandler);
         itemDropListener = new UnityAction(ItemDropHandler);
+        gameOverListener = new UnityAction(GameOverHandler);
 
         // Map gameobject to sprite image
         spriteMap = new Dictionary<string, Sprite>(){
@@ -44,6 +47,7 @@ public class UIEventLoader : MonoBehaviour
         EventManager.StartListening<ItemGrabEvent, GameObject>(itemGrabListener);
         EventManager.StartListening<ItemCollectEvent, GameObject>(itemCollectListener);
         EventManager.StartListening<ItemDropEvent>(itemDropListener);
+        EventManager.StartListening<GameOverEvent>(gameOverListener);
     }
 
     void OnDisable()
@@ -51,6 +55,7 @@ public class UIEventLoader : MonoBehaviour
         EventManager.StopListening<ItemGrabEvent, GameObject>(itemGrabListener);
         EventManager.StopListening<ItemCollectEvent, GameObject>(itemCollectListener);
         EventManager.StopListening<ItemDropEvent>(itemDropListener);
+        EventManager.StopListening<GameOverEvent>(gameOverListener);
     }
 
     void ItemGrabHandler(GameObject gameObj)
@@ -131,5 +136,12 @@ public class UIEventLoader : MonoBehaviour
 
             collectImageMap.Add(key, newImg);
         }
+    }
+
+    void GameOverHandler()
+    {
+        Debug.Log("Game over");
+        GameOver.previousScene = SceneManager.GetActiveScene().name;
+        SceneManager.LoadScene("GameOver");
     }
 }

@@ -385,5 +385,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   waypoints: []
+  captureDistance: 2
   alert: {fileID: 2100000, guid: 93b705eb7b14ca041b58e01c4d312d93, type: 2}
   notAlert: {fileID: 2100000, guid: ad921efe3d0b31142809e243f627e7d9, type: 2}

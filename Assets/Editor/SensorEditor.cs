@@ -1,25 +1,47 @@
+using System;
 using UnityEngine;
 
 // https://github.com/SebLague/Field-of-View
 using UnityEditor;
-[CustomEditor (typeof (Sensor))]
+[CustomEditor(typeof(GameObject))]
 public class SensorEditor : Editor {
 
     void OnSceneGUI()
     {
-        Sensor fow = (Sensor)target;
-        Handles.color = Color.white;
-        Handles.DrawWireArc (fow.transform.position, Vector3.up, Vector3.forward, 360, fow.viewRadius);
-        Vector3 viewAngleA = fow.DirFromAngle (-fow.viewAngle / 2, false);
-        Vector3 viewAngleB = fow.DirFromAngle (fow.viewAngle / 2, false);
-
-        Handles.DrawLine (fow.transform.position, fow.transform.position + viewAngleA * fow.viewRadius);
-        Handles.DrawLine (fow.transform.position, fow.transform.position + viewAngleB * fow.viewRadius);
-
-        Handles.color = Color.red;
-        foreach (Transform visibleTarget in fow.visibleTargets) {
-            Handles.DrawLine (fow.transform.position, visibleTarget.position);
+        var sensors = FindObjectsOfType<Sensor>();
+        foreach (var sensor in sensors)
+        {
+            DrawHearing(sensor);
+            DrawVision(sensor);
         }
+    }
+
+    private void DrawVision(Sensor sensor)
+    {
+         Handles.color = Color.white;
+         Vector3 viewAngleA = sensor.DirFromAngle (-sensor.viewAngle / 2, false);
+         Vector3 viewAngleB = sensor.DirFromAngle (sensor.viewAngle / 2, false);
+         Handles.DrawWireArc (sensor.transform.position, Vector3.up, viewAngleA, sensor.viewAngle, sensor.viewRadius);
+ 
+         Handles.DrawLine (sensor.transform.position, sensor.transform.position + viewAngleA * sensor.viewRadius);
+         Handles.DrawLine (sensor.transform.position, sensor.transform.position + viewAngleB * sensor.viewRadius);
+ 
+         Handles.color = Color.red;
+         foreach (Transform visibleTarget in sensor.visibleTargets) {
+             Handles.DrawLine (sensor.transform.position, visibleTarget.position);
+         }           
+    }
+
+    private void DrawHearing(Sensor sensor)
+    {
+        Handles.color = Color.blue;
+        Handles.DrawWireArc(sensor.transform.position, Vector3.up, Vector3.forward, 360, sensor.audibleRadius);
+
+        Handles.color = Color.yellow;
+        foreach (var target in sensor.audibleTargets)
+        {
+            Handles.DrawLine(sensor.transform.position, target.position);
+        }       
     }
 
 }

@@ -42,6 +42,10 @@ public class CamperController : MonoBehaviour, SensorListener
         renderer.material = alert;
         alertNearestRanger();
     }
+    
+    public void OnSoundHeard(Vector3 targetPosition)
+    {
+    }
 
     private void alertNearestRanger()
     {

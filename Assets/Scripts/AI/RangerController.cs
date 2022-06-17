@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -8,6 +6,8 @@ public class RangerController : MonoBehaviour, SensorListener
 {
     NavMeshAgent navAgent;
     public GameObject[] waypoints;
+    public float captureDistance;
+    
     private int currentWaypointIndex = -1;
 
     public Material alert;
@@ -71,9 +71,18 @@ public class RangerController : MonoBehaviour, SensorListener
 
     public void OnSpotted(Vector3 targetPosition)
     {
+        if (Vector3.Distance(targetPosition, transform.position) < captureDistance)
+        {
+            EventManager.TriggerEvent<GameOverEvent>();
+        }
+        
         renderer.material = alert;
         lastTimeAlertedSec = Time.realtimeSinceStartup;
         navAgent.SetDestination(targetPosition);
+    }
+
+    public void OnSoundHeard(Vector3 targetPosition)
+    {
     }
 
     public void CallForHelp(Vector3 helpPosition)

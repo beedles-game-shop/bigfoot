@@ -4,16 +4,17 @@ using UnityEngine;
 
 // https://github.com/SebLague/Field-of-View
 [RequireComponent(typeof(SensorListener))]
-
 public class Sensor : MonoBehaviour
 {
     public float viewRadius;
+    public float audibleRadius;
     [Range(0, 360)] public float viewAngle;
 
     public LayerMask targetMask;
     public LayerMask obstacleMask;
 
     [HideInInspector] public List<Transform> visibleTargets = new List<Transform>();
+    [HideInInspector] public List<Transform> audibleTargets = new List<Transform>();
 
     private SensorListener[] sensorListeners;
 
@@ -38,25 +39,27 @@ public class Sensor : MonoBehaviour
         {
             yield return new WaitForSeconds(delay);
             FindVisibleTargets();
+            FindAudibleTargets();
         }
     }
 
     void FindVisibleTargets()
     {
         visibleTargets.Clear();
-        Collider[] targetsInViewRadius = Physics.OverlapSphere(eyeTransform.position, viewRadius, targetMask);
-
-        for (int i = 0; i < targetsInViewRadius.Length; i++)
+        
+        var targets = OverlapSphere(viewRadius);
+        foreach (var target in targets)
         {
-            Transform target = targetsInViewRadius[i].transform;
-            Vector3 dirToTarget = (target.position - eyeTransform.position).normalized;
-            if (Vector3.Angle(transform.forward, dirToTarget) < viewAngle / 2)
+            var position = target.transform.position;
+            var origin = eyeTransform.position;
+            var direction = (position - origin).normalized;
+            var maxDistance = Vector3.Distance(origin, position);
+            
+            if (Vector3.Angle(transform.forward, direction) < viewAngle / 2)
             {
-                float dstToTarget = Vector3.Distance(eyeTransform.position, target.position);
-
-                if (!Physics.Raycast(eyeTransform.position, dirToTarget, dstToTarget, obstacleMask))
+                if (!Physics.Raycast(origin, direction, maxDistance, obstacleMask))
                 {
-                    visibleTargets.Add(target);
+                    visibleTargets.Add(target.transform);
                 }
             }
         }
@@ -70,6 +73,37 @@ public class Sensor : MonoBehaviour
         }
     }
 
+    void FindAudibleTargets()
+    {
+        audibleTargets.Clear();
+        
+        var targets = OverlapSphere(audibleRadius);
+        foreach (var target in targets)
+        {
+            var position = target.transform.position;
+            var origin = eyeTransform.position;
+            var direction = (position - origin).normalized;
+            var maxDistance = Vector3.Distance(origin, position);
+            
+            if (!Physics.Raycast(origin, direction, maxDistance, obstacleMask))
+            {
+                audibleTargets.Add(target.transform);
+            }
+        }
+
+        if (audibleTargets.Count > 0)
+        {
+            foreach (var sensorListener in sensorListeners)
+            {
+                sensorListener.OnSoundHeard(audibleTargets[0].transform.position);
+            }
+        }
+    }
+
+    private Collider[] OverlapSphere(float radius)
+    {
+        return Physics.OverlapSphere(eyeTransform.position, radius, targetMask);
+    }
 
     public Vector3 DirFromAngle(float angleInDegrees, bool angleIsGlobal)
     {
@@ -85,4 +119,5 @@ public class Sensor : MonoBehaviour
 public interface SensorListener
 {
     void OnSpotted(Vector3 targetPosition);
+    void OnSoundHeard(Vector3 targetPosition);
 }
