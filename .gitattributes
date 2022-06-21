@@ -1,0 +1,6 @@
+*.meta binary linguist-generated
+*.mat binary linguist-generated
+*.prefab binary linguist-generated
+*.unity binary linguist-generated
+*.asset binary linguist-generated
+
