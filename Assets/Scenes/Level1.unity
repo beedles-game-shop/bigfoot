@@ -247,7 +247,8 @@ PrefabInstance:
       propertyPath: m_Name
       value: man_lumberjack
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 0}
   m_SourcePrefab: {fileID: 100100000, guid: 4fd12b08cff1cd141b4139a81f28886e, type: 3}
 --- !u!4 &89780557 stripped
 Transform:
