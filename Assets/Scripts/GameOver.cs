@@ -1,16 +1,17 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class GameOver : MonoBehaviour
 {
+    public static string previousScene = "Demo";
+
     public void RetryButton()
     {
-        SceneManager.LoadScene("Demo");
+        SceneManager.LoadScene(previousScene);
     }
     
-    public void ExitButton() {
+    public void ExitButton() 
+    {
         Debug.Log("End");
         Application.Quit();
     }
