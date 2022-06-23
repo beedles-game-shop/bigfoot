@@ -52,6 +52,7 @@ public class UIController : MonoBehaviour
             }
 
             checklist += "- " + itemsToCollect[i].name + "\n";
+
         }
 
         gameObject.GetComponent<Text>().text = checklist;
