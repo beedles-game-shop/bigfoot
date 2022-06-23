@@ -8,15 +8,17 @@ using UnityEngine.UI;
 public class UIEventLoader : MonoBehaviour
 {
     public Image inventoryBlock;
+    public GameObject gameOverPanel;
     public GameObject collectPanel;
     public List<GameObject> itemsToCollect;
     public GameObject victoryMessage;
 
-    //list of sprites
-    // public Sprite blockSprite;
+    // List of sprites
     private Dictionary<string, Sprite> spriteMap;
+    // List of items to collect
     private Dictionary<string, Image> collectImageMap;
 
+    // Event Listeners
     private UnityAction<GameObject> itemGrabListener;
     private UnityAction<GameObject> itemCollectListener;
     private UnityAction itemDropListener;
@@ -32,7 +34,8 @@ public class UIEventLoader : MonoBehaviour
         spriteMap = new Dictionary<string, Sprite>(){
             {"cube", Resources.Load<Sprite>("Images/box")},
             {"ball", Resources.Load<Sprite>("Images/ball")},
-            {"chair", Resources.Load<Sprite>("Images/chair")}
+            {"chair", Resources.Load<Sprite>("Images/chair")},
+            {"table", Resources.Load<Sprite>("Images/table")}
         };
 
         // Build Collection Goal Images
@@ -95,6 +98,7 @@ public class UIEventLoader : MonoBehaviour
     }
 
 
+    // Building the images for items to collect on game UI.
     void BuildCollectionList()
     {
         collectImageMap = new Dictionary<string, Image>();
