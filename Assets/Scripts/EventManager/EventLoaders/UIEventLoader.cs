@@ -98,7 +98,7 @@ public class UIEventLoader : MonoBehaviour
 
         // Check Win
         if(collectImageMap.Count < 1){
-            victoryMessage.GetComponent<Text>().enabled = true;
+            EventManager.TriggerEvent<SuccessMenuEvent>();
         }
     }
 
