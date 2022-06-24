@@ -14,10 +14,8 @@ public class RangerController : MonoBehaviour, SensorListener
     
     private int currentWaypointIndex = -1;
 
-    public Material alert;
-    public Material notAlert;
-
-    private new Renderer renderer;
+    private GameObject exclamationPoint;
+    private GameObject questionMark;
 
     private float lastTimeAlertedSec;
     private float secondsToRemainAlerted = 0.5f;
@@ -27,7 +25,6 @@ public class RangerController : MonoBehaviour, SensorListener
     //! patrol point
     private void Start()
     {
-        renderer = transform.Find("Body").GetComponent<Renderer>();
         lastTimeAlertedSec = Time.realtimeSinceStartup;
 
         navAgent = GetComponent<NavMeshAgent>();
@@ -38,6 +35,20 @@ public class RangerController : MonoBehaviour, SensorListener
             setNextWaypoint();
             setTarget();
         }
+
+        exclamationPoint = transform.Find("ExclamationPoint").gameObject;
+        if(exclamationPoint == null)
+        {
+            Debug.Log("Ranger does not have exclamation point!");
+        }
+        questionMark = transform.Find("QuestionMark").gameObject;
+        if (questionMark == null)
+        {
+            Debug.Log("Ranger does not have question mark!");
+        }
+
+        exclamationPoint.SetActive(false);
+        questionMark.SetActive(false);
     }
 
     //----------------------------------------------------------------
@@ -48,7 +59,8 @@ public class RangerController : MonoBehaviour, SensorListener
     {
         if (Time.realtimeSinceStartup - lastTimeAlertedSec > secondsToRemainAlerted)
         {
-            renderer.material = notAlert;
+            exclamationPoint.SetActive(false);
+            //questionMark.SetActive(false);
         }
 
         if (waypoints.Length > 0 
@@ -98,8 +110,9 @@ public class RangerController : MonoBehaviour, SensorListener
         {
             EventManager.TriggerEvent<GameOverEvent>();
         }
-        
-        renderer.material = alert;
+
+        exclamationPoint.SetActive(true);
+        questionMark.SetActive(false);
         lastTimeAlertedSec = Time.realtimeSinceStartup;
         navAgent.SetDestination(targetPosition);
     }
@@ -111,6 +124,10 @@ public class RangerController : MonoBehaviour, SensorListener
     //!     \param targetPosition absolute position of the squatch
     public void OnSoundHeard(Vector3 targetPosition)
     {
+        if (!exclamationPoint.activeInHierarchy)
+        {
+            questionMark.SetActive(true);
+        }
     }
 
     //----------------------------------------------------------------
@@ -121,5 +138,6 @@ public class RangerController : MonoBehaviour, SensorListener
     public void CallForHelp(Vector3 helpPosition)
     {
         navAgent.SetDestination(helpPosition);
+        questionMark.SetActive(true);
     }
 }

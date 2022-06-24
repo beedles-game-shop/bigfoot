@@ -8,10 +8,8 @@ using UnityEngine.AI;
 [RequireComponent(typeof(NavMeshAgent))]
 public class CamperController : MonoBehaviour, SensorListener
 {
-    public Material alert;
-    public Material notAlert;
-
-    private new Renderer renderer;
+    private GameObject exclamationPoint;
+    private GameObject questionMark;
 
     NavMeshAgent navAgent;
     public GameObject fleeWaypoint;
@@ -20,10 +18,22 @@ public class CamperController : MonoBehaviour, SensorListener
     //! Get references to necessary game objects
     protected void Start()
     {
-        renderer = transform.Find("Body").GetComponent<Renderer>();
-
         navAgent = GetComponent<NavMeshAgent>();
         navAgent.updateRotation = false;
+
+        exclamationPoint = transform.Find("ExclamationPoint").gameObject;
+        if (exclamationPoint == null)
+        {
+            Debug.Log("Camper does not have exclamation point!");
+        }
+        questionMark = transform.Find("QuestionMark").gameObject;
+        if (questionMark == null)
+        {
+            Debug.Log("Camper does not have question mark!");
+        }
+
+        exclamationPoint.SetActive(false);
+        questionMark.SetActive(false);
     }
 
     // Update is called once per frame
@@ -52,9 +62,9 @@ public class CamperController : MonoBehaviour, SensorListener
     //!     \param targetPosition absolute position of the squatch
     public void OnSpotted(Vector3 targetPosition)
     {
-        renderer.material = alert;
         alertNearestRanger();
         navAgent.SetDestination(fleeWaypoint.transform.position);
+        exclamationPoint.SetActive(true);
     }
 
     //----------------------------------------------------------------
@@ -64,6 +74,7 @@ public class CamperController : MonoBehaviour, SensorListener
     //!     \param targetPosition absolute position of the squatch
     public void OnSoundHeard(Vector3 targetPosition)
     {
+        questionMark.SetActive(true);
     }
 
     //----------------------------------------------------------------
