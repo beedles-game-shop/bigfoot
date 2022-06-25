@@ -11,7 +11,9 @@ public class RangerController : MonoBehaviour, SensorListener
     NavMeshAgent navAgent;
     public GameObject[] waypoints;
     public float captureDistance;
-    
+    public float captureTimeSec = 1.0f;
+    public float speed = 0.8f;
+
     private int currentWaypointIndex = -1;
 
     private GameObject exclamationPoint;
@@ -19,6 +21,9 @@ public class RangerController : MonoBehaviour, SensorListener
 
     private float lastTimeAlertedSec;
     private float secondsToRemainAlerted = 0.5f;
+    private float timeCaptureEnteredSec = -1; // -1 if out of capture
+
+    public float distanceToTarget = -1;
 
     //----------------------------------------------------------------
     //! Get references to all necessary game components. Sets initial
@@ -29,6 +34,7 @@ public class RangerController : MonoBehaviour, SensorListener
 
         navAgent = GetComponent<NavMeshAgent>();
         navAgent.updateRotation = false;
+        navAgent.speed = speed;
 
         if (waypoints.Length > 0)
         {
@@ -37,7 +43,7 @@ public class RangerController : MonoBehaviour, SensorListener
         }
 
         exclamationPoint = transform.Find("ExclamationPoint").gameObject;
-        if(exclamationPoint == null)
+        if (exclamationPoint == null)
         {
             Debug.Log("Ranger does not have exclamation point!");
         }
@@ -61,10 +67,11 @@ public class RangerController : MonoBehaviour, SensorListener
         {
             exclamationPoint.SetActive(false);
             //questionMark.SetActive(false);
+            timeCaptureEnteredSec = -1;
         }
 
-        if (waypoints.Length > 0 
-            && Vector3.Distance(waypoints[currentWaypointIndex].transform.position, transform.position) - navAgent.stoppingDistance < 1 
+        if (waypoints.Length > 0
+            && Vector3.Distance(waypoints[currentWaypointIndex].transform.position, transform.position) - navAgent.stoppingDistance < 1
             && !navAgent.pathPending)
         {
             setNextWaypoint();
@@ -101,34 +108,35 @@ public class RangerController : MonoBehaviour, SensorListener
     //----------------------------------------------------------------
     //! Called by the Sensor component if the squatch
     //! can be seen by this ranger. Triggers game over if the squatch
-    //! is within captureDistance
+    //! is within captureDistance for longer than captureTimeSec.
     //!
     //!     \param targetPosition absolute position of the squatch
-    
- 
+
+
     public void OnSpotted(Vector3 targetPosition)
     {
-        try
+        if (Vector3.Distance(targetPosition, transform.position) < captureDistance)
         {
-            Debug.Log("captureDist: " + captureDistance);
-
-            if (Vector3.Distance(targetPosition, transform.position) < 3)
+            if(timeCaptureEnteredSec == -1)
             {
-                Debug.Log("Game End Attempted");
+                timeCaptureEnteredSec = Time.realtimeSinceStartup;
+            }
+            if(Time.realtimeSinceStartup - timeCaptureEnteredSec > captureTimeSec)
+            {
                 EventManager.TriggerEvent<FailedMenuEvent>();
             }
-
-            exclamationPoint.SetActive(true);
-            questionMark.SetActive(false);
-            lastTimeAlertedSec = Time.realtimeSinceStartup;
-            navAgent.SetDestination(targetPosition);
-
         }
-        catch
+        else
         {
-            Debug.Log
-                ("Error thrown");
+            timeCaptureEnteredSec = -1;
         }
+
+        exclamationPoint.SetActive(true);
+        questionMark.SetActive(false);
+        lastTimeAlertedSec = Time.realtimeSinceStartup;
+        navAgent.SetDestination(targetPosition);
+
+        distanceToTarget = Vector3.Distance(targetPosition, transform.position);
     }
 
     //----------------------------------------------------------------
@@ -153,5 +161,11 @@ public class RangerController : MonoBehaviour, SensorListener
     {
         navAgent.SetDestination(helpPosition);
         questionMark.SetActive(true);
+    }
+
+    public void OnTriggerEnter(Collider other)
+    {
+        Debug.Log("I felt something!");
+        OnSpotted(other.transform.position);
     }
 }

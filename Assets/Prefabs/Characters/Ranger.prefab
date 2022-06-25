@@ -464,6 +464,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   waypoints: []
   captureDistance: 2
+  captureTimeSec: 1
+  speed: 0.5
+  distanceToTarget: -1
 --- !u!114 &3545012302304888099
 MonoBehaviour:
   m_ObjectHideFlags: 0

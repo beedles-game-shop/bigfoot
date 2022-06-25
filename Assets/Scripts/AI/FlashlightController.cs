@@ -28,8 +28,8 @@ public class FlashlightController : MonoBehaviour
     //! Updates light
     void Update()
     {
-        flashlight.range = controller.captureDistance * 1.2f; // add a little wiggle room
-        flashlight.innerSpotAngle = sensor.viewAngle;
-        flashlight.spotAngle = sensor.viewAngle;
+        flashlight.range = controller.captureDistance;
+        flashlight.innerSpotAngle = sensor.viewAngle * 1.0f;
+        flashlight.spotAngle = sensor.viewAngle * 1.5f;
     }
 }

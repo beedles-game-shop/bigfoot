@@ -8,6 +8,11 @@ public class Sensor : MonoBehaviour
 {
     public float viewRadius;
     public float audibleRadius;
+
+    // debug stuff
+    public Vector3 eulerAngleToTarget = new Vector3(0, 0, 0);
+    public bool targetObscured = false;
+
     [Range(0, 360)] public float viewAngle;
 
     public LayerMask targetMask;
@@ -43,23 +48,63 @@ public class Sensor : MonoBehaviour
         }
     }
 
+    // clamps angle to within viewAngle/2 degrees of 0/360
+    float ClampToViewAngle(float angle)
+    {
+        float returnAngle = angle;
+        if(returnAngle > viewAngle / 2 && returnAngle < 360 - viewAngle / 2)
+        {
+            if(360 - returnAngle < returnAngle)
+            {
+                // closer to 360
+                returnAngle = 360 - viewAngle / 2;
+            }
+            else
+            {
+                // closer to 0
+                returnAngle = viewAngle / 2;
+            }
+        }
+        return returnAngle;
+    }
+
     void FindVisibleTargets()
     {
         visibleTargets.Clear();
-        
-        var targets = OverlapSphere(viewRadius);
-        foreach (var target in targets)
+        Vector3 origin = eyeTransform.position;
+
+        Collider[] targets = OverlapSphere(viewRadius);
+        foreach (Collider target in targets)
         {
-            var position = target.transform.position;
-            var origin = eyeTransform.position;
-            var direction = (position - origin).normalized;
-            var maxDistance = Vector3.Distance(origin, position);
-            
-            if (Vector3.Angle(transform.forward, direction) < viewAngle / 2)
+            Vector3 targetPosition = target.transform.position;
+
+            // calculate angles to target on each axis, clamping each to viewAngle/2
+            Quaternion angleToTarget = Quaternion.FromToRotation(eyeTransform.forward, targetPosition - origin);
+
+            float clampedX, clampedY, clampedZ;
+            clampedX = ClampToViewAngle(angleToTarget.eulerAngles.x);
+            clampedY = ClampToViewAngle(angleToTarget.eulerAngles.y);
+            clampedZ = ClampToViewAngle(angleToTarget.eulerAngles.z);
+
+            angleToTarget.eulerAngles = new Vector3(0, clampedY, 0);
+            eulerAngleToTarget = angleToTarget.eulerAngles;
+
+            // check if the collider is hit by a raycast
+            // this handles situations where the collider is overlapping the fov
+            // but targetPosition is outside the cone
+            Debug.DrawRay(origin, angleToTarget * (eyeTransform.forward * viewRadius), Color.magenta, 0.1f);
+            RaycastHit targetHit, obstacleHit;
+            if (Physics.Raycast(origin, angleToTarget * eyeTransform.forward, out targetHit, viewRadius, targetMask))
             {
-                if (!Physics.Raycast(origin, direction, maxDistance, obstacleMask))
+                // check if there is an obstacle obscuring the target
+                if (!Physics.Raycast(origin, angleToTarget * origin, out obstacleHit, viewRadius, obstacleMask))
                 {
                     visibleTargets.Add(target.transform);
+                    targetObscured = false;
+                }
+                else
+                {
+                    targetObscured = true;
                 }
             }
         }
@@ -79,13 +124,8 @@ public class Sensor : MonoBehaviour
         
         var targets = OverlapSphere(audibleRadius);
         foreach (var target in targets)
-        {
-            var position = target.transform.position;
-            var origin = eyeTransform.position;
-            var direction = (position - origin).normalized;
-            var maxDistance = Vector3.Distance(origin, position);
-            
-            if (!Physics.Raycast(origin, direction, maxDistance, obstacleMask))
+        {     
+            if (Vector3.Distance(eyeTransform.position, target.transform.position) < audibleRadius)
             {
                 audibleTargets.Add(target.transform);
             }
