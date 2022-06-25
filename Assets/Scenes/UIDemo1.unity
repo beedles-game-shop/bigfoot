@@ -490,13 +490,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   inventoryBlock: {fileID: 979212329}
-  gameOverPanel: {fileID: 0}
   collectPanel: {fileID: 1850327991}
   itemsToCollect:
   - {fileID: 1943180672}
   - {fileID: 1389408190}
   - {fileID: 352002939}
-  victoryMessage: {fileID: 0}
 --- !u!114 &299122465
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1345,7 +1343,7 @@ GameObject:
   - component: {fileID: 1943180673}
   - component: {fileID: 1943180677}
   m_Layer: 0
-  m_Name: Cube
+  m_Name: Box2
   m_TagString: Grab
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
