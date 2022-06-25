@@ -104,17 +104,31 @@ public class RangerController : MonoBehaviour, SensorListener
     //! is within captureDistance
     //!
     //!     \param targetPosition absolute position of the squatch
+    
+ 
     public void OnSpotted(Vector3 targetPosition)
     {
-        if (Vector3.Distance(targetPosition, transform.position) < captureDistance)
+        try
         {
-            EventManager.TriggerEvent<GameOverEvent>();
-        }
+            Debug.Log("captureDist: " + captureDistance);
 
-        exclamationPoint.SetActive(true);
-        questionMark.SetActive(false);
-        lastTimeAlertedSec = Time.realtimeSinceStartup;
-        navAgent.SetDestination(targetPosition);
+            if (Vector3.Distance(targetPosition, transform.position) < 3)
+            {
+                Debug.Log("Game End Attempted");
+                EventManager.TriggerEvent<FailedMenuEvent>();
+            }
+
+            exclamationPoint.SetActive(true);
+            questionMark.SetActive(false);
+            lastTimeAlertedSec = Time.realtimeSinceStartup;
+            navAgent.SetDestination(targetPosition);
+
+        }
+        catch
+        {
+            Debug.Log
+                ("Error thrown");
+        }
     }
 
     //----------------------------------------------------------------
