@@ -9,10 +9,9 @@ using UnityEngine.UI;
 public class UIEventLoader : MonoBehaviour
 {
     public Image inventoryBlock;
-    public GameObject gameOverPanel;
     public GameObject collectPanel;
     public List<GameObject> itemsToCollect;
-    public GameObject victoryMessage;
+
 
     // List of sprites
     private Dictionary<string, Sprite> spriteMap;
@@ -89,6 +88,7 @@ public class UIEventLoader : MonoBehaviour
 
         Image img;
         string key = gameObj.name.ToLower();
+
         // Check if sprite is set for game object
         if(collectImageMap.TryGetValue(key, out img)){
             Debug.Log("collectible");
@@ -98,7 +98,7 @@ public class UIEventLoader : MonoBehaviour
 
         // Check Win
         if(collectImageMap.Count < 1){
-            victoryMessage.GetComponent<Text>().enabled = true;
+            EventManager.TriggerEvent<SuccessMenuEvent>();
         }
     }
 
@@ -119,6 +119,7 @@ public class UIEventLoader : MonoBehaviour
             string key = g.name.ToLower();
             Debug.Log(key);
             if(!spriteMap.TryGetValue(key, out sprite)){
+                sprite = Resources.Load<Sprite>("Images/box");
                 Debug.Log("sprite not found in map");
             }
 

@@ -480,8 +480,8 @@ CanvasGroup:
   m_GameObject: {fileID: 8557432795388017194}
   m_Enabled: 1
   m_Alpha: 0
-  m_Interactable: 1
-  m_BlocksRaycasts: 1
+  m_Interactable: 0
+  m_BlocksRaycasts: 0
   m_IgnoreParentGroups: 0
 --- !u!114 &8557432795388017184
 MonoBehaviour:
@@ -495,6 +495,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 061c37b3b642a4981a1c0df01fa2ae0b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  nextLevelName: Level2
 --- !u!1 &8557432795423327140
 GameObject:
   m_ObjectHideFlags: 0

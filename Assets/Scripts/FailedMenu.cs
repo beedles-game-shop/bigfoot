@@ -5,6 +5,7 @@ using UnityEngine.SceneManagement;
 
 public class FailedMenu : MonoBehaviour
 {
+
     void Update()
     {
         if (Input.GetKeyUp (KeyCode.L)) {
@@ -14,7 +15,7 @@ public class FailedMenu : MonoBehaviour
 
     public void RetryButton()
     {
-        SceneManager.LoadScene("UIDemo1");
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         Time.timeScale = 1f;
     }
     
