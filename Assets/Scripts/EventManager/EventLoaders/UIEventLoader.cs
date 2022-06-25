@@ -9,10 +9,9 @@ using UnityEngine.UI;
 public class UIEventLoader : MonoBehaviour
 {
     public Image inventoryBlock;
-    public GameObject gameOverPanel;
     public GameObject collectPanel;
     public List<GameObject> itemsToCollect;
-    public GameObject victoryMessage;
+
 
     // List of sprites
     private Dictionary<string, Sprite> spriteMap;
@@ -38,7 +37,10 @@ public class UIEventLoader : MonoBehaviour
             {"cube", Resources.Load<Sprite>("Images/box")},
             {"ball", Resources.Load<Sprite>("Images/ball")},
             {"chair", Resources.Load<Sprite>("Images/chair")},
-            {"table", Resources.Load<Sprite>("Images/table")}
+            {"table", Resources.Load<Sprite>("Images/table")},
+            {"lamp", Resources.Load<Sprite>("Images/lamp")},
+            {"picture", Resources.Load<Sprite>("Images/picture")},
+            {"box", Resources.Load<Sprite>("Images/box2")}
         };
 
         // Build Collection Goal Images
@@ -67,11 +69,12 @@ public class UIEventLoader : MonoBehaviour
         Debug.Log(gameObj.name);
 
         // Set default Sprite
-        Sprite sprite = Resources.Load<Sprite>("Images/box");
+        Sprite sprite = null;
 
         string key = gameObj.name.ToLower();
         // Check if sprite is set for game object
         if(!spriteMap.TryGetValue(key, out sprite)){
+            sprite = Resources.Load<Sprite>("Images/box");
             Debug.Log("sprite not found in map");
         }
         inventoryBlock.sprite = sprite;
@@ -89,6 +92,7 @@ public class UIEventLoader : MonoBehaviour
 
         Image img;
         string key = gameObj.name.ToLower();
+
         // Check if sprite is set for game object
         if(collectImageMap.TryGetValue(key, out img)){
             Debug.Log("collectible");
@@ -98,7 +102,7 @@ public class UIEventLoader : MonoBehaviour
 
         // Check Win
         if(collectImageMap.Count < 1){
-            victoryMessage.GetComponent<Text>().enabled = true;
+            EventManager.TriggerEvent<SuccessMenuEvent>();
         }
     }
 
@@ -119,6 +123,7 @@ public class UIEventLoader : MonoBehaviour
             string key = g.name.ToLower();
             Debug.Log(key);
             if(!spriteMap.TryGetValue(key, out sprite)){
+                sprite = Resources.Load<Sprite>("Images/box");
                 Debug.Log("sprite not found in map");
             }
 

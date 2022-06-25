@@ -5,6 +5,8 @@ using UnityEngine.SceneManagement;
 
 public class SuccessMenu : MonoBehaviour
 {
+    public string nextLevelName;
+
     void Update()
     {
         if (Input.GetKeyUp (KeyCode.O)) {
@@ -14,7 +16,7 @@ public class SuccessMenu : MonoBehaviour
     
     public void NextButton()
     {
-        SceneManager.LoadScene("UIDemo1");
+        SceneManager.LoadScene(nextLevelName);
         Time.timeScale = 1f;
     }
     

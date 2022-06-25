@@ -9,7 +9,7 @@ public class MainMenu : MonoBehaviour
     public void StartButton() {
         Debug.Log("Start");
         // Load next scene in scene order
-        SceneManager.LoadScene("UIDemo1");
+        SceneManager.LoadScene("Level1");
     }
 
     public void LevelButton() {
