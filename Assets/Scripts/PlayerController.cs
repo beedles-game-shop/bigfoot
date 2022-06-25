@@ -8,6 +8,7 @@ public class PlayerController : MonoBehaviour
     public float speed = 1;
     public float grabRadius = 1;
 
+    private Animator animator;
     private Vector2 movement;
     private bool isHoldingObject = false;
     private GameObject heldObject;
@@ -15,7 +16,7 @@ public class PlayerController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        animator = GetComponent<Animator>();
     }
 
     // Update is called once per frame
@@ -28,12 +29,10 @@ public class PlayerController : MonoBehaviour
     private void FixedUpdate()
     {
         // Move the player
-        Vector3 translation = new Vector3(movement.x, 0.0f, movement.y);
-
-        gameObject.transform.Translate(speed * 0.01f * translation);
-
+        animator.SetFloat("velX", Input.GetAxis("Horizontal"));
+        animator.SetFloat("velY", Input.GetAxis("Vertical"));
         // If an object is being held, move it with the player
-        if(isHoldingObject)
+        if (isHoldingObject)
         {
             heldObject.transform.position = gameObject.transform.position;
         }
