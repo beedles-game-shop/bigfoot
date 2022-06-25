@@ -215,6 +215,14 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1312483733262202114, guid: 2d96a56fbd5fbdf4f9cb1e45b995147e, type: 3}
+      propertyPath: m_Name
+      value: ExclamationPoint
+      objectReference: {fileID: 0}
+    - target: {fileID: 1633458457219650108, guid: 2d96a56fbd5fbdf4f9cb1e45b995147e, type: 3}
+      propertyPath: m_RootOrder
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 1767361583493875908, guid: 2d96a56fbd5fbdf4f9cb1e45b995147e, type: 3}
       propertyPath: m_RootOrder
       value: 0
@@ -263,6 +271,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Camper
       objectReference: {fileID: 0}
+    - target: {fileID: 6721625697546262320, guid: 2d96a56fbd5fbdf4f9cb1e45b995147e, type: 3}
+      propertyPath: m_Name
+      value: QuestionMark
+      objectReference: {fileID: 0}
+    - target: {fileID: 6949419277283574365, guid: 2d96a56fbd5fbdf4f9cb1e45b995147e, type: 3}
+      propertyPath: m_RootOrder
+      value: 5
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2d96a56fbd5fbdf4f9cb1e45b995147e, type: 3}
 --- !u!1 &5478517658974196871 stripped
@@ -287,5 +303,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: abb5bdc22d799c14e8bbb71ce7d3cd2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  alert: {fileID: 2100000, guid: 3ac0045a882876443bb8004477349abe, type: 2}
-  notAlert: {fileID: 2100000, guid: ad921efe3d0b31142809e243f627e7d9, type: 2}
+  fleeWaypoint: {fileID: 0}
