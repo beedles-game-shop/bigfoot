@@ -8,18 +8,13 @@ public class Sensor : MonoBehaviour
 {
     public float viewRadius;
     public float audibleRadius;
-
-    // debug stuff
-    public Vector3 eulerAngleToTarget = new Vector3(0, 0, 0);
-    public bool targetObscured = false;
-
     [Range(0, 360)] public float viewAngle;
 
     public LayerMask targetMask;
     public LayerMask obstacleMask;
 
-    [HideInInspector] public List<Transform> visibleTargets = new List<Transform>();
-    [HideInInspector] public List<Transform> audibleTargets = new List<Transform>();
+    [HideInInspector] public List<Vector3> visibleTargets = new List<Vector3>();
+    [HideInInspector] public List<Vector3> audibleTargets = new List<Vector3>();
 
     private SensorListener[] sensorListeners;
 
@@ -48,63 +43,23 @@ public class Sensor : MonoBehaviour
         }
     }
 
-    // clamps angle to within viewAngle/2 degrees of 0/360
-    float ClampToViewAngle(float angle)
-    {
-        float returnAngle = angle;
-        if(returnAngle > viewAngle / 2 && returnAngle < 360 - viewAngle / 2)
-        {
-            if(360 - returnAngle < returnAngle)
-            {
-                // closer to 360
-                returnAngle = 360 - viewAngle / 2;
-            }
-            else
-            {
-                // closer to 0
-                returnAngle = viewAngle / 2;
-            }
-        }
-        return returnAngle;
-    }
-
     void FindVisibleTargets()
     {
         visibleTargets.Clear();
-        Vector3 origin = eyeTransform.position;
-
-        Collider[] targets = OverlapSphere(viewRadius);
-        foreach (Collider target in targets)
+        
+        var targets = OverlapSphere(viewRadius);
+        foreach (var target in targets)
         {
-            Vector3 targetPosition = target.transform.position;
-
-            // calculate angles to target on each axis, clamping each to viewAngle/2
-            Quaternion angleToTarget = Quaternion.FromToRotation(eyeTransform.forward, targetPosition - origin);
-
-            float clampedX, clampedY, clampedZ;
-            clampedX = ClampToViewAngle(angleToTarget.eulerAngles.x);
-            clampedY = ClampToViewAngle(angleToTarget.eulerAngles.y);
-            clampedZ = ClampToViewAngle(angleToTarget.eulerAngles.z);
-
-            angleToTarget.eulerAngles = new Vector3(0, clampedY, 0);
-            eulerAngleToTarget = angleToTarget.eulerAngles;
-
-            // check if the collider is hit by a raycast
-            // this handles situations where the collider is overlapping the fov
-            // but targetPosition is outside the cone
-            Debug.DrawRay(origin, angleToTarget * (eyeTransform.forward * viewRadius), Color.magenta, 0.1f);
-            RaycastHit targetHit, obstacleHit;
-            if (Physics.Raycast(origin, angleToTarget * eyeTransform.forward, out targetHit, viewRadius, targetMask))
+            var origin = eyeTransform.position;
+            var position = target.ClosestPoint(origin);
+            var direction = (position - origin).normalized;
+            var maxDistance = Vector3.Distance(origin, position);
+            
+            if (Vector3.Angle(transform.forward, direction) < viewAngle / 2)
             {
-                // check if there is an obstacle obscuring the target
-                if (!Physics.Raycast(origin, angleToTarget * origin, out obstacleHit, viewRadius, obstacleMask))
+                if (!Physics.Raycast(origin, direction, maxDistance, obstacleMask))
                 {
-                    visibleTargets.Add(target.transform);
-                    targetObscured = false;
-                }
-                else
-                {
-                    targetObscured = true;
+                    visibleTargets.Add(position);
                 }
             }
         }
@@ -113,7 +68,7 @@ public class Sensor : MonoBehaviour
         {
             foreach (var sensorListener in sensorListeners)
             {
-                sensorListener.OnSpotted(visibleTargets[0].transform.position);
+                sensorListener.OnSpotted(visibleTargets[0]);
             }
         }
     }
@@ -124,10 +79,15 @@ public class Sensor : MonoBehaviour
         
         var targets = OverlapSphere(audibleRadius);
         foreach (var target in targets)
-        {     
-            if (Vector3.Distance(eyeTransform.position, target.transform.position) < audibleRadius)
+        {
+            var origin = eyeTransform.position;
+            var position = target.ClosestPoint(origin);
+            var direction = (position - origin).normalized;
+            var maxDistance = Vector3.Distance(origin, position);
+            
+            if (!Physics.Raycast(origin, direction, maxDistance, obstacleMask))
             {
-                audibleTargets.Add(target.transform);
+                audibleTargets.Add(position);
             }
         }
 
@@ -135,7 +95,7 @@ public class Sensor : MonoBehaviour
         {
             foreach (var sensorListener in sensorListeners)
             {
-                sensorListener.OnSoundHeard(audibleTargets[0].transform.position);
+                sensorListener.OnSoundHeard(audibleTargets[0]);
             }
         }
     }

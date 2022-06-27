@@ -27,8 +27,8 @@ public class SensorEditor : Editor {
          Handles.DrawLine (sensor.transform.position, sensor.transform.position + viewAngleB * sensor.viewRadius);
  
          Handles.color = Color.red;
-         foreach (Transform visibleTarget in sensor.visibleTargets) {
-             Handles.DrawLine (sensor.transform.position, visibleTarget.position);
+         foreach (var visibleTarget in sensor.visibleTargets) {
+             Handles.DrawLine (sensor.transform.position, visibleTarget);
          }           
     }
 
@@ -40,7 +40,7 @@ public class SensorEditor : Editor {
         Handles.color = Color.yellow;
         foreach (var target in sensor.audibleTargets)
         {
-            Handles.DrawLine(sensor.transform.position, target.position);
+            Handles.DrawLine(sensor.transform.position, target);
         }       
     }
 
