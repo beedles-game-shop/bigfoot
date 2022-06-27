@@ -103,4 +103,10 @@ public class CamperController : MonoBehaviour, SensorListener
             Debug.Log("Camper attempted to alert closest ranger, but none were found!");
         }
     }
+
+    public void OnTriggerEnter(Collider other)
+    {
+        Debug.Log("I felt something!");
+        OnSpotted(other.transform.position);
+    }
 }

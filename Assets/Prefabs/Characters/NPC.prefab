@@ -251,6 +251,7 @@ GameObject:
   - component: {fileID: 1767361583493875908}
   - component: {fileID: 2072553991287540190}
   - component: {fileID: 1748461031681350722}
+  - component: {fileID: 1225545140336925579}
   m_Layer: 0
   m_Name: NPC
   m_TagString: Untagged
@@ -291,6 +292,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   viewRadius: 5
   audibleRadius: 0
+  eulerAngleToTarget: {x: 0, y: 0, z: 0}
+  targetObscured: 0
   viewAngle: 60
   targetMask:
     serializedVersion: 2
@@ -322,6 +325,20 @@ NavMeshAgent:
   m_BaseOffset: 1
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!136 &1225545140336925579
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5787793680182637427}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  m_Radius: 0.5
+  m_Height: 2.1
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &6882011109968973203
 GameObject:
   m_ObjectHideFlags: 0

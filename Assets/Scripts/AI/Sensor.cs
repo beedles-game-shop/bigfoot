@@ -13,8 +13,8 @@ public class Sensor : MonoBehaviour
     public LayerMask targetMask;
     public LayerMask obstacleMask;
 
-    [HideInInspector] public List<Transform> visibleTargets = new List<Transform>();
-    [HideInInspector] public List<Transform> audibleTargets = new List<Transform>();
+    [HideInInspector] public List<Vector3> visibleTargets = new List<Vector3>();
+    [HideInInspector] public List<Vector3> audibleTargets = new List<Vector3>();
 
     private SensorListener[] sensorListeners;
 
@@ -50,8 +50,8 @@ public class Sensor : MonoBehaviour
         var targets = OverlapSphere(viewRadius);
         foreach (var target in targets)
         {
-            var position = target.transform.position;
             var origin = eyeTransform.position;
+            var position = target.ClosestPoint(origin);
             var direction = (position - origin).normalized;
             var maxDistance = Vector3.Distance(origin, position);
             
@@ -59,7 +59,7 @@ public class Sensor : MonoBehaviour
             {
                 if (!Physics.Raycast(origin, direction, maxDistance, obstacleMask))
                 {
-                    visibleTargets.Add(target.transform);
+                    visibleTargets.Add(position);
                 }
             }
         }
@@ -68,7 +68,7 @@ public class Sensor : MonoBehaviour
         {
             foreach (var sensorListener in sensorListeners)
             {
-                sensorListener.OnSpotted(visibleTargets[0].transform.position);
+                sensorListener.OnSpotted(visibleTargets[0]);
             }
         }
     }
@@ -80,14 +80,14 @@ public class Sensor : MonoBehaviour
         var targets = OverlapSphere(audibleRadius);
         foreach (var target in targets)
         {
-            var position = target.transform.position;
             var origin = eyeTransform.position;
+            var position = target.ClosestPoint(origin);
             var direction = (position - origin).normalized;
             var maxDistance = Vector3.Distance(origin, position);
             
             if (!Physics.Raycast(origin, direction, maxDistance, obstacleMask))
             {
-                audibleTargets.Add(target.transform);
+                audibleTargets.Add(position);
             }
         }
 
@@ -95,7 +95,7 @@ public class Sensor : MonoBehaviour
         {
             foreach (var sensorListener in sensorListeners)
             {
-                sensorListener.OnSoundHeard(audibleTargets[0].transform.position);
+                sensorListener.OnSoundHeard(audibleTargets[0]);
             }
         }
     }
