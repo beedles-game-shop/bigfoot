@@ -6,13 +6,17 @@ using UnityEngine.AI;
 //! responding to calls for help from campers.
 
 [RequireComponent(typeof(NavMeshAgent))]
+[RequireComponent(typeof(Animator))]
 public class RangerController : MonoBehaviour, SensorListener
 {
-    NavMeshAgent navAgent;
+    private NavMeshAgent navAgent;
+    private Animator animator;
+
     public GameObject[] waypoints;
     public float captureDistance;
     public float captureTimeSec = 1.0f;
     public float speed = 0.8f;
+    public float animatorSpeed = 0.018f;
 
     private int currentWaypointIndex = -1;
 
@@ -35,6 +39,10 @@ public class RangerController : MonoBehaviour, SensorListener
         navAgent = GetComponent<NavMeshAgent>();
         navAgent.updateRotation = false;
         navAgent.speed = speed;
+
+        animator = GetComponent<Animator>();
+        //animator.SetFloat("velX", 0);
+        //animator.SetFloat("velY", 0);
 
         if (waypoints.Length > 0)
         {
@@ -71,12 +79,18 @@ public class RangerController : MonoBehaviour, SensorListener
         }
 
         if (waypoints.Length > 0
-            && Vector3.Distance(waypoints[currentWaypointIndex].transform.position, transform.position) - navAgent.stoppingDistance < 1
+            && Vector3.Distance(waypoints[currentWaypointIndex].transform.position, transform.position) - navAgent.stoppingDistance < 2
             && !navAgent.pathPending)
         {
             setNextWaypoint();
             setTarget();
         }
+    }
+
+    void OnAnimatorMove()
+    {
+        // Update position to agent position
+        transform.position = navAgent.nextPosition;
     }
 
     //----------------------------------------------------------------
@@ -103,6 +117,8 @@ public class RangerController : MonoBehaviour, SensorListener
     private void setTarget()
     {
         navAgent.SetDestination(waypoints[currentWaypointIndex].transform.position);
+        animator.SetFloat("velY", animatorSpeed);
+        navAgent.speed = speed;
     }
 
     //----------------------------------------------------------------
@@ -137,6 +153,9 @@ public class RangerController : MonoBehaviour, SensorListener
         navAgent.SetDestination(targetPosition);
 
         distanceToTarget = Vector3.Distance(targetPosition, transform.position);
+
+        animator.SetFloat("velY", animatorSpeed);
+        navAgent.speed = speed;
     }
 
     //----------------------------------------------------------------

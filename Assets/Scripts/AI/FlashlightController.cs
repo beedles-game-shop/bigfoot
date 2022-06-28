@@ -6,9 +6,7 @@ using UnityEngine;
 //! This class changes the radius and length of a ranger's flashlight cone
 //! to match the dimensions of the detection cone.
 
-[RequireComponent(typeof(Sensor))]
 [RequireComponent(typeof(Light))]
-[RequireComponent(typeof(RangerController))]
 public class FlashlightController : MonoBehaviour
 {
     private Sensor sensor;
@@ -19,9 +17,18 @@ public class FlashlightController : MonoBehaviour
     //! Get references to sensor and light
     void Start()
     {
-        sensor = GetComponent<Sensor>();
+        sensor = transform.parent.GetComponent<Sensor>();
         flashlight = GetComponent<Light>();
-        controller = GetComponent<RangerController>();
+        controller = transform.parent.GetComponent<RangerController>();
+
+        if(sensor == null)
+        {
+            Debug.LogError("Flashlight assigned to a parent with no Sensor script!");
+        }
+        if (controller == null)
+        {
+            Debug.LogError("Flashlight assigned to a parent with no RangerController script!");
+        }
     }
 
     //----------------------------------------------------------------
@@ -30,6 +37,6 @@ public class FlashlightController : MonoBehaviour
     {
         flashlight.range = controller.captureDistance;
         flashlight.innerSpotAngle = sensor.viewAngle * 1.0f;
-        flashlight.spotAngle = sensor.viewAngle * 1.5f;
+        flashlight.spotAngle = sensor.viewAngle * 1.2f;
     }
 }
