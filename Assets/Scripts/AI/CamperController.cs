@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -8,11 +6,34 @@ using UnityEngine.AI;
 [RequireComponent(typeof(NavMeshAgent))]
 public class CamperController : MonoBehaviour, SensorListener
 {
+    public enum State
+    {
+        IDLING,
+        HEARD_SOMETHING,
+        SPOTTED,
+        FLEEING,
+    }
+
     private GameObject exclamationPoint;
     private GameObject questionMark;
 
     NavMeshAgent navAgent;
     public GameObject fleeWaypoint;
+
+    private State _state;
+
+    private State state
+    {
+        get => _state;
+        set
+        {
+            _state = value;
+            Debug.Log("Camper is now: " + _state);
+        }
+    }
+
+    private Vector3 lastSeenPosition;
+    private Vector3 lastHeardPosition;
 
     //----------------------------------------------------------------
     //! Get references to necessary game objects
@@ -26,20 +47,61 @@ public class CamperController : MonoBehaviour, SensorListener
         {
             Debug.Log("Camper does not have exclamation point!");
         }
+
         questionMark = transform.Find("QuestionMark").gameObject;
         if (questionMark == null)
         {
             Debug.Log("Camper does not have question mark!");
         }
 
-        exclamationPoint.SetActive(false);
-        questionMark.SetActive(false);
+        state = State.IDLING;
     }
 
     // Update is called once per frame
     protected void Update()
     {
+        switch (state)
+        {
+            case State.IDLING:
+                Idling();
+                break;
+            case State.HEARD_SOMETHING:
+                HeardSomething();
+                break;
+            case State.SPOTTED:
+                Spotted();
+                break;
+            case State.FLEEING:
+                Fleeing();
+                break;
+        }
+    }
 
+    private void Idling()
+    {
+        exclamationPoint.SetActive(false);
+        questionMark.SetActive(false);
+    }
+
+    private void HeardSomething()
+    {
+        exclamationPoint.SetActive(false);
+        questionMark.SetActive(true);
+    }
+
+    private void Spotted()
+    {
+        exclamationPoint.SetActive(true);
+        questionMark.SetActive(false);
+        alertNearestRanger();
+        state = State.FLEEING;
+    }
+
+    private void Fleeing()
+    {
+        exclamationPoint.SetActive(true);
+        questionMark.SetActive(false);
+        navAgent.SetDestination(fleeWaypoint.transform.position);
     }
 
     //----------------------------------------------------------------
@@ -62,9 +124,8 @@ public class CamperController : MonoBehaviour, SensorListener
     //!     \param targetPosition absolute position of the squatch
     public void OnSpotted(Vector3 targetPosition)
     {
-        alertNearestRanger();
-        navAgent.SetDestination(fleeWaypoint.transform.position);
-        exclamationPoint.SetActive(true);
+        lastSeenPosition = targetPosition;
+        state = State.SPOTTED;
     }
 
     //----------------------------------------------------------------
@@ -74,7 +135,17 @@ public class CamperController : MonoBehaviour, SensorListener
     //!     \param targetPosition absolute position of the squatch
     public void OnSoundHeard(Vector3 targetPosition)
     {
-        questionMark.SetActive(true);
+        lastHeardPosition = targetPosition;
+        switch (state)
+        {
+            case State.IDLING:
+            case State.HEARD_SOMETHING:
+                state = State.HEARD_SOMETHING;
+                break;
+            case State.SPOTTED:
+            case State.FLEEING:
+                break;
+        }
     }
 
     //----------------------------------------------------------------
@@ -85,16 +156,16 @@ public class CamperController : MonoBehaviour, SensorListener
         var allGameObjects = FindObjectsOfType<GameObject>();
         float closestRangerDistance = Mathf.Infinity;
         GameObject closestRanger = null;
-        for(int i = 0; i < allGameObjects.Length; i++)
+        for (int i = 0; i < allGameObjects.Length; i++)
         {
-            if(LayerMask.LayerToName(allGameObjects[i].layer) == "Ranger" 
+            if (LayerMask.LayerToName(allGameObjects[i].layer) == "Ranger"
                 && Vector3.Distance(transform.position, allGameObjects[i].transform.position) < closestRangerDistance)
             {
                 closestRanger = allGameObjects[i];
             }
         }
 
-        if(closestRanger != null)
+        if (closestRanger != null)
         {
             closestRanger.GetComponent<RangerController>().CallForHelp(transform.position);
         }
