@@ -143,8 +143,8 @@ public class RangerController : MonoBehaviour, SensorListener
     //! Called by the Sensor component if the squatch
     //! is within hearing radius of this ranger. 
     //!
-    //!     \param targetPosition absolute position of the squatch
-    public void OnSoundHeard(Vector3 targetPosition)
+    //!     \param sensorSound information about hte sound
+    public void OnSoundHeard(SensorListener.SensorSound sensorSound)
     {
         if (!exclamationPoint.activeInHierarchy)
         {

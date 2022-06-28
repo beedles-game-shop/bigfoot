@@ -40,7 +40,7 @@ public class SensorEditor : Editor {
         Handles.color = Color.yellow;
         foreach (var target in sensor.audibleTargets)
         {
-            Handles.DrawLine(sensor.transform.position, target);
+            Handles.DrawLine(sensor.transform.position, target.TargetPosition);
         }       
     }
 

@@ -14,7 +14,7 @@ public class Sensor : MonoBehaviour
     public LayerMask obstacleMask;
 
     [HideInInspector] public List<Vector3> visibleTargets = new List<Vector3>();
-    [HideInInspector] public List<Vector3> audibleTargets = new List<Vector3>();
+    [HideInInspector] public List<SensorListener.SensorSound> audibleTargets = new List<SensorListener.SensorSound>();
 
     private SensorListener[] sensorListeners;
 
@@ -22,7 +22,7 @@ public class Sensor : MonoBehaviour
 
     void Start()
     {
-        if(transform.Find("EyePosition") == null)
+        if (transform.Find("EyePosition") == null)
         {
             Debug.LogError("NPC does not have eye position!");
         }
@@ -46,21 +46,30 @@ public class Sensor : MonoBehaviour
     void FindVisibleTargets()
     {
         visibleTargets.Clear();
-        
+
+        var origin = eyeTransform.position;
+
+        // One of the sides of the fov cone
+        var edge1 = new Ray(origin, DirFromAngle(-viewAngle / 2, false));
+        // The other side of the fov cone
+        var edge2 = new Ray(origin, DirFromAngle(viewAngle / 2, false));
+
         var targets = OverlapSphere(viewRadius);
         foreach (var target in targets)
         {
-            var origin = eyeTransform.position;
-            var position = target.ClosestPoint(origin);
+            var position = target.bounds.center;
             var direction = (position - origin).normalized;
-            var maxDistance = Vector3.Distance(origin, position);
-            
-            if (Vector3.Angle(transform.forward, direction) < viewAngle / 2)
+            var targetRay = new Ray(origin, direction);
+
+            var isWithinAngle = Vector3.Angle(eyeTransform.forward, direction) < viewAngle / 2;
+
+            if (isWithinAngle && !RaycastObstacle(targetRay))
             {
-                if (!Physics.Raycast(origin, direction, maxDistance, obstacleMask))
-                {
-                    visibleTargets.Add(position);
-                }
+                visibleTargets.Add(position);
+            }
+            else if (RaycastTarget(edge1) || RaycastTarget(edge2))
+            {
+                visibleTargets.Add(position);
             }
         }
 
@@ -73,10 +82,22 @@ public class Sensor : MonoBehaviour
         }
     }
 
+    private bool RaycastTarget(Ray ray)
+    {
+        RaycastHit hitInfo;
+        var hit = Physics.Raycast(ray, out hitInfo, viewRadius, targetMask | obstacleMask);
+        return hit && targetMask == (targetMask | (1 << hitInfo.transform.gameObject.layer));
+    }
+
+    private bool RaycastObstacle(Ray ray)
+    {
+        return Physics.Raycast(ray, viewRadius, obstacleMask);
+    }
+
     void FindAudibleTargets()
     {
         audibleTargets.Clear();
-        
+
         var targets = OverlapSphere(audibleRadius);
         foreach (var target in targets)
         {
@@ -84,10 +105,14 @@ public class Sensor : MonoBehaviour
             var position = target.ClosestPoint(origin);
             var direction = (position - origin).normalized;
             var maxDistance = Vector3.Distance(origin, position);
-            
+
             if (!Physics.Raycast(origin, direction, maxDistance, obstacleMask))
             {
-                audibleTargets.Add(position);
+                audibleTargets.Add(new SensorListener.SensorSound(position, false));
+            }
+            else
+            {
+                audibleTargets.Add(new SensorListener.SensorSound(position, true));
             }
         }
 
@@ -118,6 +143,19 @@ public class Sensor : MonoBehaviour
 
 public interface SensorListener
 {
+    public struct SensorSound
+    {
+        public SensorSound(Vector3 targetPosition, bool muted)
+        {
+            Muted = muted;
+            TargetPosition = targetPosition;
+        }
+
+        public bool Muted { get; }
+
+        public Vector3 TargetPosition { get; }
+    }
+
     void OnSpotted(Vector3 targetPosition);
-    void OnSoundHeard(Vector3 targetPosition);
+    void OnSoundHeard(SensorSound sensorSound);
 }
