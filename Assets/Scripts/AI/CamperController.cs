@@ -102,9 +102,9 @@ public class CamperController : MonoBehaviour, SensorListener
         }
     }
 
-    public void OnTriggerEnter(Collider other)
+    public void OnPhysical(Vector3 targetPosition)
     {
         Debug.Log("I felt something!");
-        OnSpotted(other.transform.position);
+        OnSpotted(targetPosition);
     }
 }

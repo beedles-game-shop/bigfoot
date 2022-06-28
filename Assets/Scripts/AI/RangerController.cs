@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -163,9 +164,9 @@ public class RangerController : MonoBehaviour, SensorListener
         questionMark.SetActive(true);
     }
 
-    public void OnTriggerEnter(Collider other)
+    public void OnPhysical(Vector3 targetPosition)
     {
         Debug.Log("I felt something!");
-        OnSpotted(other.transform.position);
+        OnSpotted(targetPosition);
     }
 }

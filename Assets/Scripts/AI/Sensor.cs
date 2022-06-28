@@ -32,6 +32,15 @@ public class Sensor : MonoBehaviour
         StartCoroutine("FindTargetsWithDelay", .2f);
     }
 
+    private void OnTriggerEnter(Collider collider)
+    {
+        if (targetMask != (targetMask | (1 << collider.gameObject.layer))) return;
+
+        foreach (var sensorListener in sensorListeners)
+        {
+            sensorListener.OnPhysical(collider.bounds.center);
+        }
+    }
 
     IEnumerator FindTargetsWithDelay(float delay)
     {
@@ -158,4 +167,5 @@ public interface SensorListener
 
     void OnSpotted(Vector3 targetPosition);
     void OnSoundHeard(SensorSound sensorSound);
+    void OnPhysical(Vector3 targetPosition);
 }
