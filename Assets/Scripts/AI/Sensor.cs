@@ -29,7 +29,7 @@ public class Sensor : MonoBehaviour
 
         eyeTransform = transform.Find("EyePosition");
         sensorListeners = GetComponents<SensorListener>();
-        StartCoroutine("FindTargetsWithDelay", .2f);
+        StartCoroutine("FindTargetsWithDelay", .1f);
     }
 
     private void OnTriggerEnter(Collider collider)
@@ -57,26 +57,16 @@ public class Sensor : MonoBehaviour
         visibleTargets.Clear();
 
         var origin = eyeTransform.position;
-
-        // One of the sides of the fov cone
-        var edge1 = new Ray(origin, DirFromAngle(-viewAngle / 2, false));
-        // The other side of the fov cone
-        var edge2 = new Ray(origin, DirFromAngle(viewAngle / 2, false));
-
         var targets = OverlapSphere(viewRadius);
         foreach (var target in targets)
         {
             var position = target.bounds.center;
             var direction = (position - origin).normalized;
-            var targetRay = new Ray(origin, direction);
-
-            var isWithinAngle = Vector3.Angle(eyeTransform.forward, direction) < viewAngle / 2;
-
-            if (isWithinAngle && !RaycastObstacle(targetRay))
-            {
-                visibleTargets.Add(position);
-            }
-            else if (RaycastTarget(edge1) || RaycastTarget(edge2))
+            var angle = Vector3.SignedAngle(direction, eyeTransform.forward, Vector3.down);
+            angle = Mathf.Clamp(angle, -viewAngle/2, viewAngle/2);
+            var ray = new Ray(origin, DirFromAngle(angle, false));
+            Debug.DrawRay(ray.origin, ray.direction * viewRadius, Color.magenta);
+            if (RaycastTarget(ray))
             {
                 visibleTargets.Add(position);
             }
@@ -96,11 +86,6 @@ public class Sensor : MonoBehaviour
         RaycastHit hitInfo;
         var hit = Physics.Raycast(ray, out hitInfo, viewRadius, targetMask | obstacleMask);
         return hit && targetMask == (targetMask | (1 << hitInfo.transform.gameObject.layer));
-    }
-
-    private bool RaycastObstacle(Ray ray)
-    {
-        return Physics.Raycast(ray, viewRadius, obstacleMask);
     }
 
     void FindAudibleTargets()
