@@ -61,11 +61,9 @@ public class Sensor : MonoBehaviour
         foreach (var target in targets)
         {
             var position = target.bounds.center;
-            var direction = (position - origin).normalized;
-            var angle = Vector3.SignedAngle(direction, eyeTransform.forward, Vector3.down);
-            angle = Mathf.Clamp(angle, -viewAngle/2, viewAngle/2);
-            var ray = new Ray(origin, DirFromAngle(angle, false));
-            Debug.DrawRay(ray.origin, ray.direction * viewRadius, Color.magenta);
+            var ray = TargetRay(origin, position, true);
+            Debug.DrawRay(ray.origin, ray.direction*viewRadius, Color.magenta);
+
             if (RaycastTarget(ray))
             {
                 visibleTargets.Add(position);
@@ -81,6 +79,18 @@ public class Sensor : MonoBehaviour
         }
     }
 
+    private Ray TargetRay(Vector3 origin, Vector3 position, bool clamp)
+    {
+        var direction = (position - origin).normalized;
+        var angle = Vector3.SignedAngle(direction, eyeTransform.forward, Vector3.down);
+        if (clamp)
+        {
+            angle = Mathf.Clamp(angle, -viewAngle / 2, viewAngle / 2);
+        }
+
+        return new Ray(origin, DirFromAngle(angle, false));
+    }
+
     private bool RaycastTarget(Ray ray)
     {
         RaycastHit hitInfo;
@@ -92,15 +102,14 @@ public class Sensor : MonoBehaviour
     {
         audibleTargets.Clear();
 
+        var origin = eyeTransform.position;
         var targets = OverlapSphere(audibleRadius);
         foreach (var target in targets)
         {
-            var origin = eyeTransform.position;
-            var position = target.ClosestPoint(origin);
-            var direction = (position - origin).normalized;
-            var maxDistance = Vector3.Distance(origin, position);
+            var position = target.bounds.center;
+            var ray = TargetRay(origin, position, false);
 
-            if (!Physics.Raycast(origin, direction, maxDistance, obstacleMask))
+            if (RaycastTarget(ray))
             {
                 audibleTargets.Add(new SensorListener.SensorSound(position, false));
             }
