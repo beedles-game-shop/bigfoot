@@ -28,7 +28,7 @@ public class SensorEditor : Editor {
  
          Handles.color = Color.red;
          foreach (var visibleTarget in sensor.visibleTargets) {
-             Handles.DrawLine (sensor.transform.position, visibleTarget);
+             Handles.DrawLine (sensor.transform.position, visibleTarget, 10);
          }           
     }
 
@@ -37,10 +37,17 @@ public class SensorEditor : Editor {
         Handles.color = Color.blue;
         Handles.DrawWireArc(sensor.transform.position, Vector3.up, Vector3.forward, 360, sensor.audibleRadius);
 
-        Handles.color = Color.yellow;
         foreach (var target in sensor.audibleTargets)
         {
-            Handles.DrawLine(sensor.transform.position, target);
+            if (target.Muted)
+            {
+                Handles.color = Color.gray;
+            }
+            else
+            {
+                Handles.color = Color.yellow;
+            }
+            Handles.DrawLine(sensor.transform.position, target.TargetPosition, 8);
         }       
     }
 
