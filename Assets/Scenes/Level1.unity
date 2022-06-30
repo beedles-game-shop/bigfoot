@@ -519,6 +519,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4059531493428543354, guid: 4fd12b08cff1cd141b4139a81f28886e, type: 3}
+      propertyPath: m_Avatar
+      value: 
+      objectReference: {fileID: 9000000, guid: 0db2c57969523ca4d9fcf90796eb689d, type: 3}
+    - target: {fileID: 4059531493428543354, guid: 4fd12b08cff1cd141b4139a81f28886e, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 09db8fafc0315a048972c821ef0f20c3, type: 2}
     - target: {fileID: 5112755813365930451, guid: 4fd12b08cff1cd141b4139a81f28886e, type: 3}
       propertyPath: m_Name
       value: man_lumberjack
@@ -1427,6 +1435,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6409268340190213769, guid: 8f4d3aba7cf16a84cb202852524c6500, type: 3}
+      propertyPath: m_Avatar
+      value: 
+      objectReference: {fileID: 9000000, guid: a81d8d74b2ef46743bc278a30e17553c, type: 3}
+    - target: {fileID: 6409268340190213769, guid: 8f4d3aba7cf16a84cb202852524c6500, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 09db8fafc0315a048972c821ef0f20c3, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8f4d3aba7cf16a84cb202852524c6500, type: 3}
 --- !u!1001 &440149686
@@ -7486,6 +7502,14 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 983079951}
     m_Modifications:
+    - target: {fileID: 994438091922898009, guid: e1f25da782070d442854da6dc2435386, type: 3}
+      propertyPath: m_Avatar
+      value: 
+      objectReference: {fileID: 9000000, guid: 3b769bc763009bd45bee45300f086994, type: 3}
+    - target: {fileID: 994438091922898009, guid: e1f25da782070d442854da6dc2435386, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 09db8fafc0315a048972c821ef0f20c3, type: 2}
     - target: {fileID: 4607409748621003327, guid: e1f25da782070d442854da6dc2435386, type: 3}
       propertyPath: m_Name
       value: woman_casual
