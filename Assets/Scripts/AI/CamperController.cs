@@ -6,13 +6,18 @@ using UnityEngine.AI;
 //----------------------------------------------------------------
 //! Controls fleeing if this camper sees the squatch
 [RequireComponent(typeof(NavMeshAgent))]
+[RequireComponent(typeof(Animator))]
 public class CamperController : MonoBehaviour, SensorListener
 {
     private GameObject exclamationPoint;
     private GameObject questionMark;
 
     NavMeshAgent navAgent;
+    private Animator animator;
+
     public GameObject fleeWaypoint;
+
+    public float speed = 0.8f;
 
     //----------------------------------------------------------------
     //! Get references to necessary game objects
@@ -20,6 +25,8 @@ public class CamperController : MonoBehaviour, SensorListener
     {
         navAgent = GetComponent<NavMeshAgent>();
         navAgent.updateRotation = false;
+
+        animator = GetComponent<Animator>();
 
         exclamationPoint = transform.Find("ExclamationPoint").gameObject;
         if (exclamationPoint == null)
@@ -43,15 +50,21 @@ public class CamperController : MonoBehaviour, SensorListener
     }
 
     //----------------------------------------------------------------
-    //! Points the camper along its current velocity vector. This is
-    //! to avoid an ice skating effect when slowly rotated by the nav
-    //! agent.
-    private void LateUpdate()
+    //! Adjusts animator and navAgent speeds and rotations.
+    void FixedUpdate()
     {
+        navAgent.speed = speed;
+
         if (navAgent.velocity.sqrMagnitude > Mathf.Epsilon)
         {
             transform.rotation = Quaternion.LookRotation(navAgent.velocity.normalized);
         }
+    }
+
+    void OnAnimatorMove()
+    {
+        // Update position to agent position
+        transform.position = navAgent.nextPosition;
     }
 
     //----------------------------------------------------------------
@@ -65,6 +78,12 @@ public class CamperController : MonoBehaviour, SensorListener
         alertNearestRanger();
         navAgent.SetDestination(fleeWaypoint.transform.position);
         exclamationPoint.SetActive(true);
+
+        if (animator.runtimeAnimatorController != null)
+        {
+            // to prevent prefab errors
+            animator.SetFloat("velY", speed / 4.75f);
+        }
     }
 
     //----------------------------------------------------------------

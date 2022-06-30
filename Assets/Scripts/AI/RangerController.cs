@@ -16,7 +16,6 @@ public class RangerController : MonoBehaviour, SensorListener
     public float captureDistance;
     public float captureTimeSec = 1.0f;
     public float speed = 0.8f;
-    public float animatorSpeed = 0.018f;
 
     private int currentWaypointIndex = -1;
 
@@ -41,6 +40,7 @@ public class RangerController : MonoBehaviour, SensorListener
         navAgent.speed = speed;
 
         animator = GetComponent<Animator>();
+
         //animator.SetFloat("velX", 0);
         //animator.SetFloat("velY", 0);
 
@@ -87,6 +87,19 @@ public class RangerController : MonoBehaviour, SensorListener
         }
     }
 
+
+    //----------------------------------------------------------------
+    //! Adjusts animator and navAgent speeds and rotations.
+    void FixedUpdate()
+    {
+        navAgent.speed = speed;
+
+        if (navAgent.velocity.sqrMagnitude > Mathf.Epsilon)
+        {
+            transform.rotation = Quaternion.LookRotation(navAgent.velocity.normalized);
+        }
+    }
+
     void OnAnimatorMove()
     {
         // Update position to agent position
@@ -110,6 +123,11 @@ public class RangerController : MonoBehaviour, SensorListener
     private void setNextWaypoint()
     {
         currentWaypointIndex = (currentWaypointIndex + 1) % waypoints.Length;
+        if (animator.runtimeAnimatorController != null)
+        {
+            // to prevent prefab errors
+            animator.SetFloat("velY", speed / 4.75f);
+        }
     }
 
     //----------------------------------------------------------------
@@ -117,8 +135,11 @@ public class RangerController : MonoBehaviour, SensorListener
     private void setTarget()
     {
         navAgent.SetDestination(waypoints[currentWaypointIndex].transform.position);
-        animator.SetFloat("velY", animatorSpeed);
-        navAgent.speed = speed;
+        if (animator.runtimeAnimatorController != null)
+        {
+            // to prevent prefab errors
+            animator.SetFloat("velY", speed / 4.75f);
+        }
     }
 
     //----------------------------------------------------------------
@@ -127,8 +148,6 @@ public class RangerController : MonoBehaviour, SensorListener
     //! is within captureDistance for longer than captureTimeSec.
     //!
     //!     \param targetPosition absolute position of the squatch
-
-
     public void OnSpotted(Vector3 targetPosition)
     {
         if (Vector3.Distance(targetPosition, transform.position) < captureDistance)
@@ -154,7 +173,6 @@ public class RangerController : MonoBehaviour, SensorListener
 
         distanceToTarget = Vector3.Distance(targetPosition, transform.position);
 
-        animator.SetFloat("velY", animatorSpeed);
         navAgent.speed = speed;
     }
 
