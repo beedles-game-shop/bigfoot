@@ -40,7 +40,9 @@ public class UIEventLoader : MonoBehaviour
             {"table", Resources.Load<Sprite>("Images/table")},
             {"lamp", Resources.Load<Sprite>("Images/lamp")},
             {"picture", Resources.Load<Sprite>("Images/picture")},
-            {"box", Resources.Load<Sprite>("Images/box2")}
+            {"box", Resources.Load<Sprite>("Images/box2")},
+            {"flashlight-old", Resources.Load<Sprite>("Images/lamp")},
+            {"supply-drop-fabric", Resources.Load<Sprite>("Images/box2")}
         };
 
         // Build Collection Goal Images
