@@ -14,7 +14,7 @@ public class Sensor : MonoBehaviour
     public LayerMask obstacleMask;
 
     [HideInInspector] public List<Vector3> visibleTargets = new List<Vector3>();
-    [HideInInspector] public List<Vector3> audibleTargets = new List<Vector3>();
+    [HideInInspector] public List<SensorListener.SensorSound> audibleTargets = new List<SensorListener.SensorSound>();
 
     private SensorListener[] sensorListeners;
 
@@ -22,16 +22,25 @@ public class Sensor : MonoBehaviour
 
     void Start()
     {
-        if(transform.Find("EyePosition") == null)
+        if (transform.Find("EyePosition") == null)
         {
             Debug.LogError("NPC does not have eye position!");
         }
 
         eyeTransform = transform.Find("EyePosition");
         sensorListeners = GetComponents<SensorListener>();
-        StartCoroutine("FindTargetsWithDelay", .2f);
+        StartCoroutine("FindTargetsWithDelay", .1f);
     }
 
+    private void OnTriggerEnter(Collider collider)
+    {
+        if (targetMask != (targetMask | (1 << collider.gameObject.layer))) return;
+
+        foreach (var sensorListener in sensorListeners)
+        {
+            sensorListener.OnPhysical(collider.bounds.center);
+        }
+    }
 
     IEnumerator FindTargetsWithDelay(float delay)
     {
@@ -46,21 +55,18 @@ public class Sensor : MonoBehaviour
     void FindVisibleTargets()
     {
         visibleTargets.Clear();
-        
+
+        var origin = eyeTransform.position;
         var targets = OverlapSphere(viewRadius);
         foreach (var target in targets)
         {
-            var origin = eyeTransform.position;
-            var position = target.ClosestPoint(origin);
-            var direction = (position - origin).normalized;
-            var maxDistance = Vector3.Distance(origin, position);
-            
-            if (Vector3.Angle(transform.forward, direction) < viewAngle / 2)
+            var position = target.bounds.center;
+            var ray = TargetRay(origin, position, true);
+            Debug.DrawRay(ray.origin, ray.direction*viewRadius, Color.magenta);
+
+            if (RaycastTarget(ray))
             {
-                if (!Physics.Raycast(origin, direction, maxDistance, obstacleMask))
-                {
-                    visibleTargets.Add(position);
-                }
+                visibleTargets.Add(position);
             }
         }
 
@@ -73,21 +79,43 @@ public class Sensor : MonoBehaviour
         }
     }
 
+    private Ray TargetRay(Vector3 origin, Vector3 position, bool clamp)
+    {
+        var direction = (position - origin).normalized;
+        var angle = Vector3.SignedAngle(direction, eyeTransform.forward, Vector3.down);
+        if (clamp)
+        {
+            angle = Mathf.Clamp(angle, -viewAngle / 2, viewAngle / 2);
+        }
+
+        return new Ray(origin, DirFromAngle(angle, false));
+    }
+
+    private bool RaycastTarget(Ray ray)
+    {
+        RaycastHit hitInfo;
+        var hit = Physics.Raycast(ray, out hitInfo, viewRadius, targetMask | obstacleMask);
+        return hit && targetMask == (targetMask | (1 << hitInfo.transform.gameObject.layer));
+    }
+
     void FindAudibleTargets()
     {
         audibleTargets.Clear();
-        
+
+        var origin = eyeTransform.position;
         var targets = OverlapSphere(audibleRadius);
         foreach (var target in targets)
         {
-            var origin = eyeTransform.position;
-            var position = target.ClosestPoint(origin);
-            var direction = (position - origin).normalized;
-            var maxDistance = Vector3.Distance(origin, position);
-            
-            if (!Physics.Raycast(origin, direction, maxDistance, obstacleMask))
+            var position = target.bounds.center;
+            var ray = TargetRay(origin, position, false);
+
+            if (RaycastTarget(ray))
             {
-                audibleTargets.Add(position);
+                audibleTargets.Add(new SensorListener.SensorSound(position, false));
+            }
+            else
+            {
+                audibleTargets.Add(new SensorListener.SensorSound(position, true));
             }
         }
 
@@ -118,6 +146,20 @@ public class Sensor : MonoBehaviour
 
 public interface SensorListener
 {
+    public struct SensorSound
+    {
+        public SensorSound(Vector3 targetPosition, bool muted)
+        {
+            Muted = muted;
+            TargetPosition = targetPosition;
+        }
+
+        public bool Muted { get; }
+
+        public Vector3 TargetPosition { get; }
+    }
+
     void OnSpotted(Vector3 targetPosition);
-    void OnSoundHeard(Vector3 targetPosition);
+    void OnSoundHeard(SensorSound sensorSound);
+    void OnPhysical(Vector3 targetPosition);
 }

@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -143,8 +144,8 @@ public class RangerController : MonoBehaviour, SensorListener
     //! Called by the Sensor component if the squatch
     //! is within hearing radius of this ranger. 
     //!
-    //!     \param targetPosition absolute position of the squatch
-    public void OnSoundHeard(Vector3 targetPosition)
+    //!     \param sensorSound information about hte sound
+    public void OnSoundHeard(SensorListener.SensorSound sensorSound)
     {
         if (!exclamationPoint.activeInHierarchy)
         {
@@ -163,9 +164,9 @@ public class RangerController : MonoBehaviour, SensorListener
         questionMark.SetActive(true);
     }
 
-    public void OnTriggerEnter(Collider other)
+    public void OnPhysical(Vector3 targetPosition)
     {
         Debug.Log("I felt something!");
-        OnSpotted(other.transform.position);
+        OnSpotted(targetPosition);
     }
 }
