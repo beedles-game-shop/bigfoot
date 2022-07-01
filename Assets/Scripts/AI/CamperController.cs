@@ -7,16 +7,18 @@ using UnityEngine.AI;
 [RequireComponent(typeof(Animator))]
 public class CamperController : MonoBehaviour, SensorListener
 {
-    public enum State
+    public enum CamperState
     {
-        IDLING,
-        HEARD_SOMETHING,
-        SPOTTED,
-        FLEEING,
+        Idling,
+        HeardSomething,
+        Fleeing,
+        Dead,
     }
 
     private GameObject exclamationPoint;
     private GameObject questionMark;
+
+    private Alert Alert => new Alert(exclamationPoint, questionMark);
 
     NavMeshAgent navAgent;
     private Animator animator;
@@ -25,20 +27,16 @@ public class CamperController : MonoBehaviour, SensorListener
 
     public float speed = 0.8f;
 
-    private State _state;
-
-    private State state
+    private CamperState state;
+    private CamperState State
     {
-        get => _state;
+        get => state;
         set
         {
-            _state = value;
-            Debug.Log("Camper is now: " + _state);
+            Debug.Log($"Camper: {state}->{value}");
+            state = value;
         }
     }
-
-    private Vector3 lastSeenPosition;
-    private Vector3 lastHeardPosition;
 
     //----------------------------------------------------------------
     //! Get references to necessary game objects
@@ -61,54 +59,13 @@ public class CamperController : MonoBehaviour, SensorListener
             Debug.Log("Camper does not have question mark!");
         }
 
-        state = State.IDLING;
+        State = CamperState.Idling;
+        Alert.State = Alert.States.None;
     }
 
     // Update is called once per frame
     protected void Update()
     {
-        switch (state)
-        {
-            case State.IDLING:
-                Idling();
-                break;
-            case State.HEARD_SOMETHING:
-                HeardSomething();
-                break;
-            case State.SPOTTED:
-                Spotted();
-                break;
-            case State.FLEEING:
-                Fleeing();
-                break;
-        }
-    }
-
-    private void Idling()
-    {
-        exclamationPoint.SetActive(false);
-        questionMark.SetActive(false);
-    }
-
-    private void HeardSomething()
-    {
-        exclamationPoint.SetActive(false);
-        questionMark.SetActive(true);
-    }
-
-    private void Spotted()
-    {
-        exclamationPoint.SetActive(true);
-        questionMark.SetActive(false);
-        alertNearestRanger();
-        state = State.FLEEING;
-    }
-
-    private void Fleeing()
-    {
-        exclamationPoint.SetActive(true);
-        questionMark.SetActive(false);
-        navAgent.SetDestination(fleeWaypoint.transform.position);
     }
 
     //----------------------------------------------------------------
@@ -137,8 +94,18 @@ public class CamperController : MonoBehaviour, SensorListener
     //!     \param targetPosition absolute position of the squatch
     public void OnSpotted(Vector3 targetPosition)
     {
-        lastSeenPosition = targetPosition;
-        state = State.SPOTTED;
+        switch (State)
+        {
+            case CamperState.Idling:
+            case CamperState.HeardSomething:
+                Alert.State = Alert.States.Exclamation;
+                alertNearestRanger();
+                navAgent.SetDestination(fleeWaypoint.transform.position);
+                State = CamperState.Fleeing;
+                break;
+            case CamperState.Fleeing:
+                break;
+        }
 
         if (animator.runtimeAnimatorController != null)
         {
@@ -154,17 +121,6 @@ public class CamperController : MonoBehaviour, SensorListener
     //!     \param sensorSound information about the sound
     public void OnSoundHeard(SensorListener.SensorSound sensorSound)
     {
-        lastHeardPosition = sensorSound.TargetPosition;
-        switch (state)
-        {
-            case State.IDLING:
-            case State.HEARD_SOMETHING:
-                state = State.HEARD_SOMETHING;
-                break;
-            case State.SPOTTED:
-            case State.FLEEING:
-                break;
-        }
     }
 
     //----------------------------------------------------------------
@@ -196,7 +152,16 @@ public class CamperController : MonoBehaviour, SensorListener
 
     public void OnPhysical(Vector3 targetPosition)
     {
-        Debug.Log("I felt something!");
-        OnSpotted(targetPosition);
+        switch (State)
+        {
+            case CamperState.Idling:
+            case CamperState.HeardSomething:
+            case CamperState.Fleeing:
+                EventManager.TriggerEvent<FailedMenuEvent>();
+                state = CamperState.Dead;
+                break;
+            case CamperState.Dead:
+                break;
+        }
     }
 }
