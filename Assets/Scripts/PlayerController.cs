@@ -17,6 +17,7 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         animator = GetComponent<Animator>();
+        EventManager.TriggerEvent<ThoughtEvent, string, float>("I need a crate", 5.0f);
     }
 
     // Update is called once per frame

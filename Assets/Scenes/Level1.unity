@@ -3539,6 +3539,17 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1026423870 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 9072916549376898870, guid: 4c590c2b8a5ca422d873a3ae640db312, type: 3}
+  m_PrefabInstance: {fileID: 1725759565}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1035891817
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5213,6 +5224,10 @@ PrefabInstance:
       propertyPath: collectPanel
       value: 
       objectReference: {fileID: 1141523555}
+    - target: {fileID: 1033169469868143473, guid: 70e3854e31e81d74e88915d5c6cd89f5, type: 3}
+      propertyPath: thoughtImage
+      value: 
+      objectReference: {fileID: 1026423870}
     - target: {fileID: 1033169469868143473, guid: 70e3854e31e81d74e88915d5c6cd89f5, type: 3}
       propertyPath: inventoryBlock
       value: 
