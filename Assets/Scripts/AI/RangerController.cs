@@ -15,6 +15,7 @@ public class RangerController : MonoBehaviour, SensorListener
         Chasing,
         HeardSomething,
         RespondingToCall,
+        AtCall,
         Capturing,
         Dead,
     }
@@ -36,14 +37,19 @@ public class RangerController : MonoBehaviour, SensorListener
     
     private NavMeshAgent navAgent;
     private Animator animator;
+    public float navSpeedToAnimatorSpeedFactor = 0.5f;
 
     public GameObject[] waypoints;
     public float captureDistance = 3f;
     public float captureTimeSec = 1.0f;
-    public float speed = 0.8f;
+    public float speed = 1f;
     public float secondsToRemainAlerted = 3f;
 
     private int currentWaypointIndex = -1;
+
+    private Vector3 callForHelpLocation = new Vector3(0, 0, 0);
+    public float secondsToStayAtCallForHelpLocation = 5f;
+    private float timeArrivedAtHelpLocation = -1.0f;
 
     private GameObject exclamationPoint;
     private GameObject questionMark;
@@ -99,19 +105,22 @@ public class RangerController : MonoBehaviour, SensorListener
     //! point has been reached.
     private void Update()
     {
+        animator.SetFloat("velX", 0.0f);
+
         switch (State)
         {
             case RangerState.Patrolling:
                 setTarget();
-                if (waypoints.Length > 0
-                    && Vector3.Distance(waypoints[currentWaypointIndex].transform.position, transform.position) -
-                    navAgent.stoppingDistance < 2
-                    && !navAgent.pathPending)
+                if (waypoints.Length > 0)
                 {
-                    setNextWaypoint();
-                    setTarget();
+                    Vector3 vectorToTarget = waypoints[currentWaypointIndex].transform.position - transform.position;
+                    vectorToTarget.y = 0;
+                    if (vectorToTarget.magnitude - navAgent.stoppingDistance < 0.5f && !navAgent.pathPending)
+                    {
+                        setNextWaypoint();
+                        setTarget();
+                    }
                 }
-
                 break;
             case RangerState.Chasing:
                 if (Time.realtimeSinceStartup - lastTimeSpottedSec > secondsToRemainAlerted)
@@ -143,6 +152,26 @@ public class RangerController : MonoBehaviour, SensorListener
                 transform.rotation = Quaternion.Slerp(transform.rotation, rotation, Time.deltaTime * 0.5f);
                 break;
             case RangerState.RespondingToCall:
+                Vector3 vectorToCall = callForHelpLocation - transform.position;
+                vectorToCall.y = 0;
+                if (vectorToCall.magnitude - navAgent.stoppingDistance < 0.5f && !navAgent.pathPending)
+                {
+                    timeArrivedAtHelpLocation = Time.realtimeSinceStartup;
+                    if (animator.runtimeAnimatorController != null)
+                    {
+                        // to prevent prefab errors
+                        animator.SetFloat("velY", 0.0f);
+                    }
+                    State = RangerState.AtCall;
+                }
+                break;
+            case RangerState.AtCall:
+                if (Time.realtimeSinceStartup - timeArrivedAtHelpLocation > secondsToStayAtCallForHelpLocation)
+                {
+                    Alert.State = Alert.States.None;
+                    State = RangerState.Patrolling;
+                }
+                break;
             case RangerState.Dead:
                 break;
         }
@@ -187,7 +216,7 @@ public class RangerController : MonoBehaviour, SensorListener
         if (animator.runtimeAnimatorController != null)
         {
             // to prevent prefab errors
-            animator.SetFloat("velY", speed / 4.75f);
+            animator.SetFloat("velY", speed * navSpeedToAnimatorSpeedFactor);
         }
     }
 
@@ -199,7 +228,7 @@ public class RangerController : MonoBehaviour, SensorListener
         if (animator.runtimeAnimatorController != null)
         {
             // to prevent prefab errors
-            animator.SetFloat("velY", speed / 4.75f);
+            animator.SetFloat("velY", speed * navSpeedToAnimatorSpeedFactor);
         }
     }
 
@@ -217,6 +246,7 @@ public class RangerController : MonoBehaviour, SensorListener
             case RangerState.Chasing:
             case RangerState.HeardSomething:
             case RangerState.RespondingToCall:
+            case RangerState.AtCall:
                 if (Vector3.Distance(targetPosition, transform.position) < captureDistance)
                 {
                     Alert.State = Alert.States.Exclamation;
@@ -273,6 +303,7 @@ public class RangerController : MonoBehaviour, SensorListener
             case RangerState.Patrolling:
             case RangerState.HeardSomething:
             case RangerState.RespondingToCall:
+            case RangerState.AtCall:
                 Alert.State = Alert.States.Question;
                 navAgent.SetDestination(transform.position);
                 lastHeard = sensorSound;
@@ -297,9 +328,11 @@ public class RangerController : MonoBehaviour, SensorListener
         {
             case RangerState.Patrolling:
             case RangerState.RespondingToCall:
+            case RangerState.AtCall:
                 navAgent.SetDestination(helpPosition);
                 Alert.State = Alert.States.Question;
                 State = RangerState.RespondingToCall;
+                callForHelpLocation = helpPosition;
                 break;
             case RangerState.HeardSomething:
             case RangerState.Chasing:
@@ -315,6 +348,7 @@ public class RangerController : MonoBehaviour, SensorListener
         {
             case RangerState.Patrolling:
             case RangerState.RespondingToCall:
+            case RangerState.AtCall:
             case RangerState.HeardSomething:
             case RangerState.Chasing:
             case RangerState.Capturing:

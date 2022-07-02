@@ -12,6 +12,7 @@ public class CamperController : MonoBehaviour, SensorListener
         Idling,
         HeardSomething,
         Fleeing,
+        AtSafeSpace,
         Dead,
     }
 
@@ -22,10 +23,11 @@ public class CamperController : MonoBehaviour, SensorListener
 
     NavMeshAgent navAgent;
     private Animator animator;
+    public float navSpeedToAnimatorSpeedFactor = 0.5f;
 
     public GameObject fleeWaypoint;
 
-    public float speed = 0.8f;
+    public float speed = 1f;
 
     private CamperState state;
     private CamperState State
@@ -66,6 +68,40 @@ public class CamperController : MonoBehaviour, SensorListener
     // Update is called once per frame
     protected void Update()
     {
+        animator.SetFloat("velX", 0.0f);
+
+        switch (State)
+        {
+            case CamperState.Idling:
+            case CamperState.HeardSomething:
+                if (animator.runtimeAnimatorController != null)
+                {
+                    // to prevent prefab errors
+                    animator.SetFloat("velY", 0.0f);
+                }
+                break;
+            case CamperState.Fleeing:
+                if (animator.runtimeAnimatorController != null)
+                {
+                    // to prevent prefab errors
+                    animator.SetFloat("velY", speed * navSpeedToAnimatorSpeedFactor);
+                }
+
+                Vector3 vectorToTarget = fleeWaypoint.transform.position - transform.position;
+                vectorToTarget.y = 0;
+                if (vectorToTarget.magnitude - navAgent.stoppingDistance < 0.5f && !navAgent.pathPending)
+                {
+                    State = CamperState.AtSafeSpace;
+                }
+                break;
+            case CamperState.AtSafeSpace:
+                if (animator.runtimeAnimatorController != null)
+                {
+                    // to prevent prefab errors
+                    animator.SetFloat("velY", 0.0f);
+                }
+                break;
+        }
     }
 
     //----------------------------------------------------------------
@@ -104,13 +140,15 @@ public class CamperController : MonoBehaviour, SensorListener
                 State = CamperState.Fleeing;
                 break;
             case CamperState.Fleeing:
+                Vector3 vectorToTarget = fleeWaypoint.transform.position - transform.position;
+                vectorToTarget.y = 0;
+                if (vectorToTarget.magnitude - navAgent.stoppingDistance < 0.5f && !navAgent.pathPending)
+                {
+                    State = CamperState.AtSafeSpace;
+                }
                 break;
-        }
-
-        if (animator.runtimeAnimatorController != null)
-        {
-            // to prevent prefab errors
-            animator.SetFloat("velY", speed / 4.75f);
+            case CamperState.AtSafeSpace:
+                break;
         }
     }
 
@@ -157,6 +195,7 @@ public class CamperController : MonoBehaviour, SensorListener
             case CamperState.Idling:
             case CamperState.HeardSomething:
             case CamperState.Fleeing:
+            case CamperState.AtSafeSpace:
                 EventManager.TriggerEvent<FailedMenuEvent>();
                 state = CamperState.Dead;
                 break;
