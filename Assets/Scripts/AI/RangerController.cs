@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -10,22 +9,50 @@ using UnityEngine.AI;
 [RequireComponent(typeof(Animator))]
 public class RangerController : MonoBehaviour, SensorListener
 {
+    public enum RangerState
+    {
+        Patrolling,
+        Chasing,
+        HeardSomething,
+        RespondingToCall,
+        Capturing,
+        Dead,
+    }
+
+    private RangerState state;
+
+    private RangerState State
+    {
+        get => state;
+        set
+        {
+            if (state != value)
+            {
+                Debug.Log($"Ranger: {state}->{value}");
+            }
+            state = value;
+        }
+    }
+    
     private NavMeshAgent navAgent;
     private Animator animator;
 
     public GameObject[] waypoints;
-    public float captureDistance;
+    public float captureDistance = 3f;
     public float captureTimeSec = 1.0f;
     public float speed = 0.8f;
+    public float secondsToRemainAlerted = 3f;
 
     private int currentWaypointIndex = -1;
 
     private GameObject exclamationPoint;
     private GameObject questionMark;
+    private Alert Alert => new Alert(exclamationPoint, questionMark);
 
-    private float lastTimeAlertedSec;
-    private float secondsToRemainAlerted = 0.5f;
+    private float lastTimeSpottedSec;
     private float timeCaptureEnteredSec = -1; // -1 if out of capture
+    private SensorListener.SensorSound lastHeard;
+    private float lastTimeHeardSec;
 
     public float distanceToTarget = -1;
 
@@ -34,7 +61,7 @@ public class RangerController : MonoBehaviour, SensorListener
     //! patrol point
     private void Start()
     {
-        lastTimeAlertedSec = Time.realtimeSinceStartup;
+        lastTimeSpottedSec = Time.realtimeSinceStartup;
 
         navAgent = GetComponent<NavMeshAgent>();
         navAgent.updateRotation = false;
@@ -62,8 +89,8 @@ public class RangerController : MonoBehaviour, SensorListener
             Debug.Log("Ranger does not have question mark!");
         }
 
-        exclamationPoint.SetActive(false);
-        questionMark.SetActive(false);
+        Alert.State = Alert.States.None;
+        State = RangerState.Patrolling;
     }
 
     //----------------------------------------------------------------
@@ -72,19 +99,52 @@ public class RangerController : MonoBehaviour, SensorListener
     //! point has been reached.
     private void Update()
     {
-        if (Time.realtimeSinceStartup - lastTimeAlertedSec > secondsToRemainAlerted)
+        switch (State)
         {
-            exclamationPoint.SetActive(false);
-            //questionMark.SetActive(false);
-            timeCaptureEnteredSec = -1;
-        }
+            case RangerState.Patrolling:
+                setTarget();
+                if (waypoints.Length > 0
+                    && Vector3.Distance(waypoints[currentWaypointIndex].transform.position, transform.position) -
+                    navAgent.stoppingDistance < 2
+                    && !navAgent.pathPending)
+                {
+                    setNextWaypoint();
+                    setTarget();
+                }
 
-        if (waypoints.Length > 0
-            && Vector3.Distance(waypoints[currentWaypointIndex].transform.position, transform.position) - navAgent.stoppingDistance < 2
-            && !navAgent.pathPending)
-        {
-            setNextWaypoint();
-            setTarget();
+                break;
+            case RangerState.Chasing:
+                if (Time.realtimeSinceStartup - lastTimeSpottedSec > secondsToRemainAlerted)
+                {
+                    Alert.State = Alert.States.None;
+                    State = RangerState.Patrolling;
+                }
+
+                break;
+            case RangerState.Capturing:
+                if (Time.realtimeSinceStartup - timeCaptureEnteredSec > captureTimeSec)
+                {
+                    EventManager.TriggerEvent<FailedMenuEvent>();
+                    State = RangerState.Dead;
+                }
+
+                break;
+            case RangerState.HeardSomething:
+                if (Time.realtimeSinceStartup - lastTimeHeardSec > secondsToRemainAlerted)
+                {
+                    Alert.State = Alert.States.None;
+                    State = RangerState.Patrolling;
+                    break;
+                }
+                
+                var look = lastHeard.TargetPosition - transform.position;
+                look.y = 0;
+                var rotation = Quaternion.LookRotation(look);
+                transform.rotation = Quaternion.Slerp(transform.rotation, rotation, Time.deltaTime * 0.5f);
+                break;
+            case RangerState.RespondingToCall:
+            case RangerState.Dead:
+                break;
         }
     }
 
@@ -151,32 +211,56 @@ public class RangerController : MonoBehaviour, SensorListener
     //!     \param targetPosition absolute position of the squatch
     public void OnSpotted(Vector3 targetPosition)
     {
-        if (Vector3.Distance(targetPosition, transform.position) < captureDistance)
+        switch (State)
         {
-            if(timeCaptureEnteredSec == -1)
-            {
-                EventManager.TriggerEvent<ThoughtEvent, string, float>("O.O", 2.0f);
-                timeCaptureEnteredSec = Time.realtimeSinceStartup;
-            }
-            if(Time.realtimeSinceStartup - timeCaptureEnteredSec > captureTimeSec)
-            {
-                EventManager.TriggerEvent<ThoughtEvent, string, float>("T.T", 8.0f);
-                EventManager.TriggerEvent<FailedMenuEvent>();
-            }
+            case RangerState.Patrolling:
+            case RangerState.Chasing:
+            case RangerState.HeardSomething:
+            case RangerState.RespondingToCall:
+                if (Vector3.Distance(targetPosition, transform.position) < captureDistance)
+                {
+                    EventManager.TriggerEvent<ThoughtEvent, string, float>("O.O", 2.0f);
+                    Alert.State = Alert.States.Exclamation;
+                    timeCaptureEnteredSec = Time.realtimeSinceStartup;
+                    State = RangerState.Capturing;
+                    break;
+                }
+                
+                EventManager.TriggerEvent<ThoughtEvent, string, float>("...!", 2.0f);
+                Alert.State = Alert.States.Exclamation;
+                lastTimeSpottedSec = Time.realtimeSinceStartup;
+                navAgent.SetDestination(targetPosition);
+                navAgent.speed = speed;
+                State = RangerState.Chasing;
+                
+                break;
+            case RangerState.Capturing:
+                if (Time.realtimeSinceStartup - timeCaptureEnteredSec > captureTimeSec)
+                {
+                    EventManager.TriggerEvent<ThoughtEvent, string, float>("T.T", 8.0f);
+                    EventManager.TriggerEvent<FailedMenuEvent>();
+                    Alert.State = Alert.States.None;
+                    State = RangerState.Dead;
+                    break;
+                }
+
+                if (Vector3.Distance(targetPosition, transform.position) > captureDistance)
+                {
+                    EventManager.TriggerEvent<ThoughtEvent, string, float>("...!", 2.0f);
+                    timeCaptureEnteredSec = -1;
+                    Alert.State = Alert.States.Exclamation;
+                    State = RangerState.Chasing;
+                    break;
+                }
+                
+                lastTimeSpottedSec = Time.realtimeSinceStartup;
+                navAgent.SetDestination(targetPosition);
+                navAgent.speed = speed;
+
+                break;
+            case RangerState.Dead:
+                break;
         }
-        else
-        {
-            timeCaptureEnteredSec = -1;
-        }
-
-        exclamationPoint.SetActive(true);
-        questionMark.SetActive(false);
-        lastTimeAlertedSec = Time.realtimeSinceStartup;
-        navAgent.SetDestination(targetPosition);
-
-        distanceToTarget = Vector3.Distance(targetPosition, transform.position);
-
-        navAgent.speed = speed;
     }
 
     //----------------------------------------------------------------
@@ -186,9 +270,22 @@ public class RangerController : MonoBehaviour, SensorListener
     //!     \param sensorSound information about hte sound
     public void OnSoundHeard(SensorListener.SensorSound sensorSound)
     {
-        if (!exclamationPoint.activeInHierarchy)
+        switch (State)
         {
-            questionMark.SetActive(true);
+            case RangerState.Patrolling:
+            case RangerState.HeardSomething:
+            case RangerState.RespondingToCall:
+                EventManager.TriggerEvent<ThoughtEvent, string, float>("...", 2.0f);
+                Alert.State = Alert.States.Question;
+                navAgent.SetDestination(transform.position);
+                lastHeard = sensorSound;
+                lastTimeHeardSec = Time.realtimeSinceStartup;
+                State = RangerState.HeardSomething;
+                break;
+            case RangerState.Chasing:
+            case RangerState.Capturing:
+            case RangerState.Dead:
+                break;
         }
     }
 
@@ -199,13 +296,38 @@ public class RangerController : MonoBehaviour, SensorListener
     //!     \param helpPosition absolute position of the camper calling for help
     public void CallForHelp(Vector3 helpPosition)
     {
-        navAgent.SetDestination(helpPosition);
-        questionMark.SetActive(true);
+        switch (State)
+        {
+            case RangerState.Patrolling:
+            case RangerState.RespondingToCall:
+                EventManager.TriggerEvent<ThoughtEvent, string, float>("...", 2.0f);
+                navAgent.SetDestination(helpPosition);
+                Alert.State = Alert.States.Question;
+                State = RangerState.RespondingToCall;
+                break;
+            case RangerState.HeardSomething:
+            case RangerState.Chasing:
+            case RangerState.Capturing:
+            case RangerState.Dead:
+                break;
+        }
     }
 
     public void OnPhysical(Vector3 targetPosition)
     {
-        Debug.Log("I felt something!");
-        OnSpotted(targetPosition);
+        switch (State)
+        {
+            case RangerState.Patrolling:
+            case RangerState.RespondingToCall:
+            case RangerState.HeardSomething:
+            case RangerState.Chasing:
+            case RangerState.Capturing:
+                EventManager.TriggerEvent<ThoughtEvent, string, float>("T.T", 8.0f);
+                EventManager.TriggerEvent<FailedMenuEvent>();
+                State = RangerState.Dead;               
+                break;
+            case RangerState.Dead:
+                break;
+        }
     }
 }
