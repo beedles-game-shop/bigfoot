@@ -8,6 +8,18 @@ using UnityEngine.UI;
 
 public class UIEventLoader : MonoBehaviour
 {
+    private struct TimeoutCallback
+    {
+        public Action Callback { get;  }
+        public float Timeout { get; }
+
+        public TimeoutCallback(Action callback, float timeout)
+        {
+            Callback = callback;
+            Timeout = timeout;
+        }
+    }
+    
     public Image inventoryBlock;
     public GameObject collectPanel;
     public List<GameObject> itemsToCollect;
@@ -25,6 +37,8 @@ public class UIEventLoader : MonoBehaviour
     private UnityAction itemDropListener;
     private UnityAction gameOverListener;
     private UnityAction<string, float> thoughtListener;
+
+    private TimeoutCallback? thoughtBubbleTimeout;
 
     void Awake()
     {   
@@ -50,6 +64,15 @@ public class UIEventLoader : MonoBehaviour
 
         // Build Collection Goal Images
         BuildCollectionList();
+    }
+
+    private void Update()
+    {
+        if (thoughtBubbleTimeout?.Timeout < Time.realtimeSinceStartup)
+        {
+            thoughtBubbleTimeout?.Callback();
+            thoughtBubbleTimeout = null;
+        }
     }
 
     void OnEnable()
@@ -165,24 +188,18 @@ public class UIEventLoader : MonoBehaviour
 
     void ThoughtHandler(string message, float delay)
     {
-        Debug.Log("thoughtBubble");
-        thoughtImage.gameObject.SetActive(false);
-
+        thoughtImage.gameObject.SetActive(true);
         Text thoughtText = thoughtImage.gameObject.GetComponentsInChildren<Text>()[0];
         if (message.Length != 0) {
             thoughtText.text = message;
         } else {
             thoughtText.text = "I need a crate.";
-        }   
-        
-        StartCoroutine(ShowThoughtBubble(delay));
-    }
+        }
 
-    IEnumerator ShowThoughtBubble(float delay)
-    {
-        thoughtImage.gameObject.SetActive(true);
-        yield return new WaitForSeconds(delay);
-        thoughtImage.gameObject.SetActive(false);
+        thoughtBubbleTimeout = new TimeoutCallback(() =>
+        {
+            thoughtImage.gameObject.SetActive(false);
+        }, delay + Time.realtimeSinceStartup);
     }
 
     void GameOverHandler()
