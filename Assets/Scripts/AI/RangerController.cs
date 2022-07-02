@@ -155,10 +155,12 @@ public class RangerController : MonoBehaviour, SensorListener
         {
             if(timeCaptureEnteredSec == -1)
             {
+                EventManager.TriggerEvent<ThoughtEvent, string, float>("O.O", 2.0f);
                 timeCaptureEnteredSec = Time.realtimeSinceStartup;
             }
             if(Time.realtimeSinceStartup - timeCaptureEnteredSec > captureTimeSec)
             {
+                EventManager.TriggerEvent<ThoughtEvent, string, float>("T.T", 8.0f);
                 EventManager.TriggerEvent<FailedMenuEvent>();
             }
         }

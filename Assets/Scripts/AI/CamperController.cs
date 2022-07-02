@@ -94,6 +94,7 @@ public class CamperController : MonoBehaviour, SensorListener
     {
         exclamationPoint.SetActive(false);
         questionMark.SetActive(true);
+        EventManager.TriggerEvent<ThoughtEvent, string, float>("...", 2.0f);
     }
 
     private void Spotted()
@@ -102,6 +103,7 @@ public class CamperController : MonoBehaviour, SensorListener
         questionMark.SetActive(false);
         alertNearestRanger();
         state = State.FLEEING;
+        EventManager.TriggerEvent<ThoughtEvent, string, float>("...!", 2.0f);
     }
 
     private void Fleeing()
