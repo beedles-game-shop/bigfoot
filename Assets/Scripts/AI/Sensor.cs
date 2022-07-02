@@ -6,9 +6,9 @@ using UnityEngine;
 [RequireComponent(typeof(SensorListener))]
 public class Sensor : MonoBehaviour
 {
-    public float viewRadius;
-    public float audibleRadius;
-    [Range(0, 360)] public float viewAngle;
+    public float viewRadius = 5f;
+    public float audibleRadius = 3.5f;
+    [Range(0, 360)] public float viewAngle = 90;
 
     public LayerMask targetMask;
     public LayerMask obstacleMask;
