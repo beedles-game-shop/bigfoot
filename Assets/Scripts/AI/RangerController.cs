@@ -306,6 +306,12 @@ public class RangerController : MonoBehaviour, SensorListener
             case RangerState.AtCall:
                 Alert.State = Alert.States.Question;
                 navAgent.SetDestination(transform.position);
+
+                if (animator.runtimeAnimatorController != null)
+                {
+                    animator.SetFloat("velY", 0.0f);
+                }
+
                 lastHeard = sensorSound;
                 lastTimeHeardSec = Time.realtimeSinceStartup;
                 State = RangerState.HeardSomething;
