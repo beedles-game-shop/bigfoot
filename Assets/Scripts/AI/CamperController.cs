@@ -68,25 +68,14 @@ public class CamperController : MonoBehaviour, SensorListener
     // Update is called once per frame
     protected void Update()
     {
-        animator.SetFloat("velX", 0.0f);
-
         switch (State)
         {
             case CamperState.Idling:
             case CamperState.HeardSomething:
-                if (animator.runtimeAnimatorController != null)
-                {
-                    // to prevent prefab errors
-                    animator.SetFloat("velY", 0.0f);
-                }
+                StopWalkAnimation();
                 break;
             case CamperState.Fleeing:
-                if (animator.runtimeAnimatorController != null)
-                {
-                    // to prevent prefab errors
-                    animator.SetFloat("velY", speed * navSpeedToAnimatorSpeedFactor);
-                }
-
+                StartWalkAnimation();
                 Vector3 vectorToTarget = fleeWaypoint.transform.position - transform.position;
                 vectorToTarget.y = 0;
                 if (vectorToTarget.magnitude - navAgent.stoppingDistance < 0.5f && !navAgent.pathPending)
@@ -95,11 +84,7 @@ public class CamperController : MonoBehaviour, SensorListener
                 }
                 break;
             case CamperState.AtSafeSpace:
-                if (animator.runtimeAnimatorController != null)
-                {
-                    // to prevent prefab errors
-                    animator.SetFloat("velY", 0.0f);
-                }
+                StopWalkAnimation();
                 break;
         }
     }
@@ -204,6 +189,22 @@ public class CamperController : MonoBehaviour, SensorListener
                 break;
             case CamperState.Dead:
                 break;
+        }
+    }
+
+    private void StartWalkAnimation()
+    {
+        if (animator.runtimeAnimatorController != null)
+        {
+            animator.SetFloat("velY", speed * navSpeedToAnimatorSpeedFactor);
+        }
+    }
+
+    private void StopWalkAnimation()
+    {
+        if (animator.runtimeAnimatorController != null)
+        {
+            animator.SetFloat("velY", 0.0f);
         }
     }
 }
