@@ -105,12 +105,9 @@ public class RangerController : MonoBehaviour, SensorListener
     //! point has been reached.
     private void Update()
     {
-        animator.SetFloat("velX", 0.0f);
-
         switch (State)
         {
             case RangerState.Patrolling:
-                setTarget();
                 if (waypoints.Length > 0)
                 {
                     Vector3 vectorToTarget = waypoints[currentWaypointIndex].transform.position - transform.position;
@@ -118,11 +115,17 @@ public class RangerController : MonoBehaviour, SensorListener
                     if (vectorToTarget.magnitude - navAgent.stoppingDistance < 0.5f && !navAgent.pathPending)
                     {
                         setNextWaypoint();
-                        setTarget();
                     }
+                    setTarget();
+                }
+                else
+                {
+                    StopWalkAnimation();
                 }
                 break;
             case RangerState.Chasing:
+                StartWalkAnimation();
+
                 if (Time.realtimeSinceStartup - lastTimeSpottedSec > secondsToRemainAlerted)
                 {
                     Alert.State = Alert.States.None;
@@ -131,6 +134,8 @@ public class RangerController : MonoBehaviour, SensorListener
 
                 break;
             case RangerState.Capturing:
+                StartWalkAnimation();
+
                 if (Time.realtimeSinceStartup - timeCaptureEnteredSec > captureTimeSec)
                 {
                     EventManager.TriggerEvent<FailedMenuEvent>();
@@ -139,6 +144,8 @@ public class RangerController : MonoBehaviour, SensorListener
 
                 break;
             case RangerState.HeardSomething:
+                StopWalkAnimation();
+
                 if (Time.realtimeSinceStartup - lastTimeHeardSec > secondsToRemainAlerted)
                 {
                     Alert.State = Alert.States.None;
@@ -150,22 +157,22 @@ public class RangerController : MonoBehaviour, SensorListener
                 look.y = 0;
                 var rotation = Quaternion.LookRotation(look);
                 transform.rotation = Quaternion.Slerp(transform.rotation, rotation, Time.deltaTime * 0.5f);
+                
                 break;
             case RangerState.RespondingToCall:
+                StartWalkAnimation();
+
                 Vector3 vectorToCall = callForHelpLocation - transform.position;
                 vectorToCall.y = 0;
                 if (vectorToCall.magnitude - navAgent.stoppingDistance < 0.5f && !navAgent.pathPending)
                 {
                     timeArrivedAtHelpLocation = Time.realtimeSinceStartup;
-                    if (animator.runtimeAnimatorController != null)
-                    {
-                        // to prevent prefab errors
-                        animator.SetFloat("velY", 0.0f);
-                    }
+                    StopWalkAnimation();
                     State = RangerState.AtCall;
                 }
                 break;
             case RangerState.AtCall:
+                StopWalkAnimation();
                 if (Time.realtimeSinceStartup - timeArrivedAtHelpLocation > secondsToStayAtCallForHelpLocation)
                 {
                     Alert.State = Alert.States.None;
@@ -173,6 +180,7 @@ public class RangerController : MonoBehaviour, SensorListener
                 }
                 break;
             case RangerState.Dead:
+                StopWalkAnimation();
                 break;
         }
     }
@@ -213,11 +221,6 @@ public class RangerController : MonoBehaviour, SensorListener
     private void setNextWaypoint()
     {
         currentWaypointIndex = (currentWaypointIndex + 1) % waypoints.Length;
-        if (animator.runtimeAnimatorController != null)
-        {
-            // to prevent prefab errors
-            animator.SetFloat("velY", speed * navSpeedToAnimatorSpeedFactor);
-        }
     }
 
     //----------------------------------------------------------------
@@ -262,7 +265,6 @@ public class RangerController : MonoBehaviour, SensorListener
                 navAgent.SetDestination(targetPosition);
                 navAgent.speed = speed;
                 State = RangerState.Chasing;
-                
                 break;
             case RangerState.Capturing:
                 if (Time.realtimeSinceStartup - timeCaptureEnteredSec > captureTimeSec)
@@ -286,7 +288,6 @@ public class RangerController : MonoBehaviour, SensorListener
                 lastTimeSpottedSec = Time.realtimeSinceStartup;
                 navAgent.SetDestination(targetPosition);
                 navAgent.speed = speed;
-
                 break;
             case RangerState.Dead:
                 break;
@@ -308,12 +309,6 @@ public class RangerController : MonoBehaviour, SensorListener
             case RangerState.AtCall:
                 Alert.State = Alert.States.Question;
                 navAgent.SetDestination(transform.position);
-
-                if (animator.runtimeAnimatorController != null)
-                {
-                    animator.SetFloat("velY", 0.0f);
-                }
-
                 lastHeard = sensorSound;
                 lastTimeHeardSec = Time.realtimeSinceStartup;
                 State = RangerState.HeardSomething;
@@ -353,6 +348,8 @@ public class RangerController : MonoBehaviour, SensorListener
 
     public void OnPhysical(Vector3 targetPosition)
     {
+        StopWalkAnimation();
+
         switch (State)
         {
             case RangerState.Patrolling:
@@ -367,6 +364,22 @@ public class RangerController : MonoBehaviour, SensorListener
                 break;
             case RangerState.Dead:
                 break;
+        }
+    }
+
+    private void StartWalkAnimation()
+    {
+        if (animator.runtimeAnimatorController != null)
+        {
+            animator.SetFloat("velY", speed * navSpeedToAnimatorSpeedFactor);
+        }
+    }
+
+    private void StopWalkAnimation()
+    {
+        if (animator.runtimeAnimatorController != null)
+        {
+            animator.SetFloat("velY", 0.0f);
         }
     }
 }
