@@ -7331,6 +7331,10 @@ PrefabInstance:
       propertyPath: m_LocalPosition.z
       value: 0.88
       objectReference: {fileID: 0}
+    - target: {fileID: 4099912030666449945, guid: 8f4d3aba7cf16a84cb202852524c6500, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4741215524253481693, guid: 8f4d3aba7cf16a84cb202852524c6500, type: 3}
       propertyPath: m_Name
       value: Ranger
@@ -7394,6 +7398,14 @@ PrefabInstance:
     - target: {fileID: 6506140974141651804, guid: 8f4d3aba7cf16a84cb202852524c6500, type: 3}
       propertyPath: audibleRadius
       value: 3.71
+      objectReference: {fileID: 0}
+    - target: {fileID: 8555970192187684283, guid: 8f4d3aba7cf16a84cb202852524c6500, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8614348683414896122, guid: 8f4d3aba7cf16a84cb202852524c6500, type: 3}
+      propertyPath: m_Layer
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8f4d3aba7cf16a84cb202852524c6500, type: 3}
