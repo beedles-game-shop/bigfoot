@@ -137,6 +137,7 @@ public class CamperController : MonoBehaviour, SensorListener
                 Alert.State = Alert.States.Exclamation;
                 alertNearestRanger();
                 navAgent.SetDestination(fleeWaypoint.transform.position);
+                EventManager.TriggerEvent<ThoughtEvent, string, float>("...!", 2.0f);
                 State = CamperState.Fleeing;
                 break;
             case CamperState.Fleeing:
@@ -159,6 +160,7 @@ public class CamperController : MonoBehaviour, SensorListener
     //!     \param sensorSound information about the sound
     public void OnSoundHeard(SensorListener.SensorSound sensorSound)
     {
+        EventManager.TriggerEvent<ThoughtEvent, string, float>("...", 2.0f);
     }
 
     //----------------------------------------------------------------
@@ -196,6 +198,7 @@ public class CamperController : MonoBehaviour, SensorListener
             case CamperState.HeardSomething:
             case CamperState.Fleeing:
             case CamperState.AtSafeSpace:
+                EventManager.TriggerEvent<ThoughtEvent, string, float>("T.T", 8.0f);
                 EventManager.TriggerEvent<FailedMenuEvent>();
                 state = CamperState.Dead;
                 break;

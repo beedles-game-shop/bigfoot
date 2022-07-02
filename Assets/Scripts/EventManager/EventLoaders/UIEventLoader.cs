@@ -8,9 +8,22 @@ using UnityEngine.UI;
 
 public class UIEventLoader : MonoBehaviour
 {
+    private struct TimeoutCallback
+    {
+        public Action Callback { get;  }
+        public float Timeout { get; }
+
+        public TimeoutCallback(Action callback, float timeout)
+        {
+            Callback = callback;
+            Timeout = timeout;
+        }
+    }
+    
     public Image inventoryBlock;
     public GameObject collectPanel;
     public List<GameObject> itemsToCollect;
+    public Image thoughtImage;
 
 
     // List of sprites
@@ -23,6 +36,9 @@ public class UIEventLoader : MonoBehaviour
     private UnityAction<GameObject> itemCollectListener;
     private UnityAction itemDropListener;
     private UnityAction gameOverListener;
+    private UnityAction<string, float> thoughtListener;
+
+    private TimeoutCallback? thoughtBubbleTimeout;
 
     void Awake()
     {   
@@ -31,6 +47,7 @@ public class UIEventLoader : MonoBehaviour
         itemCollectListener = new UnityAction<GameObject>(ItemCollectHandler);
         itemDropListener = new UnityAction(ItemDropHandler);
         gameOverListener = new UnityAction(GameOverHandler);
+        thoughtListener = new UnityAction<string, float>(ThoughtHandler);
 
         // Map gameobject to sprite image
         spriteMap = new Dictionary<string, Sprite>(){
@@ -49,12 +66,22 @@ public class UIEventLoader : MonoBehaviour
         BuildCollectionList();
     }
 
+    private void Update()
+    {
+        if (thoughtBubbleTimeout?.Timeout < Time.realtimeSinceStartup)
+        {
+            thoughtBubbleTimeout?.Callback();
+            thoughtBubbleTimeout = null;
+        }
+    }
+
     void OnEnable()
     {
         EventManager.StartListening<ItemGrabEvent, GameObject>(itemGrabListener);
         EventManager.StartListening<ItemCollectEvent, GameObject>(itemCollectListener);
         EventManager.StartListening<ItemDropEvent>(itemDropListener);
         EventManager.StartListening<GameOverEvent>(gameOverListener);
+        EventManager.StartListening<ThoughtEvent, string, float>(thoughtListener);
     }
 
     void OnDisable()
@@ -63,6 +90,7 @@ public class UIEventLoader : MonoBehaviour
         EventManager.StopListening<ItemCollectEvent, GameObject>(itemCollectListener);
         EventManager.StopListening<ItemDropEvent>(itemDropListener);
         EventManager.StopListening<GameOverEvent>(gameOverListener);
+        EventManager.StopListening<ThoughtEvent, string, float>(thoughtListener);
     }
 
     void ItemGrabHandler(GameObject gameObj)
@@ -72,13 +100,21 @@ public class UIEventLoader : MonoBehaviour
 
         // Set default Sprite
         Sprite sprite = null;
+        Image img;
 
         string key = gameObj.name.ToLower();
+        
         // Check if sprite is set for game object
         if(!spriteMap.TryGetValue(key, out sprite)){
             sprite = Resources.Load<Sprite>("Images/box");
             Debug.Log("sprite not found in map");
+        } 
+
+        // If object is an item to collect
+        if(collectImageMap.TryGetValue(key, out img)){
+            EventManager.TriggerEvent<ThoughtEvent, string, float>("Let's go home", 5.0f);
         }
+
         inventoryBlock.sprite = sprite;
     }
 
@@ -104,6 +140,7 @@ public class UIEventLoader : MonoBehaviour
 
         // Check Win
         if(collectImageMap.Count < 1){
+            EventManager.TriggerEvent<ThoughtEvent, string, float>("WOO HOO!!", 8.0f);
             EventManager.TriggerEvent<SuccessMenuEvent>();
         }
     }
@@ -149,10 +186,28 @@ public class UIEventLoader : MonoBehaviour
         }
     }
 
+    void ThoughtHandler(string message, float delay)
+    {
+        thoughtImage.gameObject.SetActive(true);
+        Text thoughtText = thoughtImage.gameObject.GetComponentsInChildren<Text>()[0];
+        if (message.Length != 0) {
+            thoughtText.text = message;
+        } else {
+            thoughtText.text = "I need a crate.";
+        }
+
+        thoughtBubbleTimeout = new TimeoutCallback(() =>
+        {
+            thoughtImage.gameObject.SetActive(false);
+        }, delay + Time.realtimeSinceStartup);
+    }
+
     void GameOverHandler()
     {
         Debug.Log("Game over");
         GameOver.previousScene = SceneManager.GetActiveScene().name;
         SceneManager.LoadScene("GameOver");
     }
+
+
 }

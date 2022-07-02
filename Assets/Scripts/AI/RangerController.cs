@@ -249,24 +249,25 @@ public class RangerController : MonoBehaviour, SensorListener
             case RangerState.AtCall:
                 if (Vector3.Distance(targetPosition, transform.position) < captureDistance)
                 {
+                    EventManager.TriggerEvent<ThoughtEvent, string, float>("O.O", 2.0f);
                     Alert.State = Alert.States.Exclamation;
                     timeCaptureEnteredSec = Time.realtimeSinceStartup;
                     State = RangerState.Capturing;
-                }
-                else
-                {
-                    Alert.State = Alert.States.Exclamation;
-                    State = RangerState.Chasing;
+                    break;
                 }
                 
+                EventManager.TriggerEvent<ThoughtEvent, string, float>("...!", 2.0f);
+                Alert.State = Alert.States.Exclamation;
                 lastTimeSpottedSec = Time.realtimeSinceStartup;
                 navAgent.SetDestination(targetPosition);
                 navAgent.speed = speed;
+                State = RangerState.Chasing;
                 
                 break;
             case RangerState.Capturing:
                 if (Time.realtimeSinceStartup - timeCaptureEnteredSec > captureTimeSec)
                 {
+                    EventManager.TriggerEvent<ThoughtEvent, string, float>("T.T", 8.0f);
                     EventManager.TriggerEvent<FailedMenuEvent>();
                     Alert.State = Alert.States.None;
                     State = RangerState.Dead;
@@ -275,6 +276,7 @@ public class RangerController : MonoBehaviour, SensorListener
 
                 if (Vector3.Distance(targetPosition, transform.position) > captureDistance)
                 {
+                    EventManager.TriggerEvent<ThoughtEvent, string, float>("...!", 2.0f);
                     timeCaptureEnteredSec = -1;
                     Alert.State = Alert.States.Exclamation;
                     State = RangerState.Chasing;
@@ -335,6 +337,7 @@ public class RangerController : MonoBehaviour, SensorListener
             case RangerState.Patrolling:
             case RangerState.RespondingToCall:
             case RangerState.AtCall:
+                EventManager.TriggerEvent<ThoughtEvent, string, float>("...", 2.0f);
                 navAgent.SetDestination(helpPosition);
                 Alert.State = Alert.States.Question;
                 State = RangerState.RespondingToCall;
@@ -358,6 +361,7 @@ public class RangerController : MonoBehaviour, SensorListener
             case RangerState.HeardSomething:
             case RangerState.Chasing:
             case RangerState.Capturing:
+                EventManager.TriggerEvent<ThoughtEvent, string, float>("T.T", 8.0f);
                 EventManager.TriggerEvent<FailedMenuEvent>();
                 State = RangerState.Dead;               
                 break;
