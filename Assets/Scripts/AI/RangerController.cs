@@ -15,6 +15,7 @@ public class RangerController : MonoBehaviour, SensorListener
         Chasing,
         HeardSomething,
         RespondingToCall,
+        AtCall,
         Capturing,
         Dead,
     }
@@ -36,14 +37,19 @@ public class RangerController : MonoBehaviour, SensorListener
     
     private NavMeshAgent navAgent;
     private Animator animator;
+    public float navSpeedToAnimatorSpeedFactor = 0.5f;
 
     public GameObject[] waypoints;
     public float captureDistance = 3f;
     public float captureTimeSec = 1.0f;
-    public float speed = 0.8f;
+    public float speed = 1f;
     public float secondsToRemainAlerted = 3f;
 
     private int currentWaypointIndex = -1;
+
+    private Vector3 callForHelpLocation = new Vector3(0, 0, 0);
+    public float secondsToStayAtCallForHelpLocation = 5f;
+    private float timeArrivedAtHelpLocation = -1.0f;
 
     private GameObject exclamationPoint;
     private GameObject questionMark;
@@ -102,18 +108,24 @@ public class RangerController : MonoBehaviour, SensorListener
         switch (State)
         {
             case RangerState.Patrolling:
-                setTarget();
-                if (waypoints.Length > 0
-                    && Vector3.Distance(waypoints[currentWaypointIndex].transform.position, transform.position) -
-                    navAgent.stoppingDistance < 2
-                    && !navAgent.pathPending)
+                if (waypoints.Length > 0)
                 {
-                    setNextWaypoint();
+                    Vector3 vectorToTarget = waypoints[currentWaypointIndex].transform.position - transform.position;
+                    vectorToTarget.y = 0;
+                    if (vectorToTarget.magnitude - navAgent.stoppingDistance < 0.5f && !navAgent.pathPending)
+                    {
+                        setNextWaypoint();
+                    }
                     setTarget();
                 }
-
+                else
+                {
+                    StopWalkAnimation();
+                }
                 break;
             case RangerState.Chasing:
+                StartWalkAnimation();
+
                 if (Time.realtimeSinceStartup - lastTimeSpottedSec > secondsToRemainAlerted)
                 {
                     Alert.State = Alert.States.None;
@@ -122,6 +134,8 @@ public class RangerController : MonoBehaviour, SensorListener
 
                 break;
             case RangerState.Capturing:
+                StartWalkAnimation();
+
                 if (Time.realtimeSinceStartup - timeCaptureEnteredSec > captureTimeSec)
                 {
                     EventManager.TriggerEvent<FailedMenuEvent>();
@@ -130,6 +144,8 @@ public class RangerController : MonoBehaviour, SensorListener
 
                 break;
             case RangerState.HeardSomething:
+                StopWalkAnimation();
+
                 if (Time.realtimeSinceStartup - lastTimeHeardSec > secondsToRemainAlerted)
                 {
                     Alert.State = Alert.States.None;
@@ -141,9 +157,30 @@ public class RangerController : MonoBehaviour, SensorListener
                 look.y = 0;
                 var rotation = Quaternion.LookRotation(look);
                 transform.rotation = Quaternion.Slerp(transform.rotation, rotation, Time.deltaTime * 0.5f);
+                
                 break;
             case RangerState.RespondingToCall:
+                StartWalkAnimation();
+
+                Vector3 vectorToCall = callForHelpLocation - transform.position;
+                vectorToCall.y = 0;
+                if (vectorToCall.magnitude - navAgent.stoppingDistance < 0.5f && !navAgent.pathPending)
+                {
+                    timeArrivedAtHelpLocation = Time.realtimeSinceStartup;
+                    StopWalkAnimation();
+                    State = RangerState.AtCall;
+                }
+                break;
+            case RangerState.AtCall:
+                StopWalkAnimation();
+                if (Time.realtimeSinceStartup - timeArrivedAtHelpLocation > secondsToStayAtCallForHelpLocation)
+                {
+                    Alert.State = Alert.States.None;
+                    State = RangerState.Patrolling;
+                }
+                break;
             case RangerState.Dead:
+                StopWalkAnimation();
                 break;
         }
     }
@@ -184,11 +221,6 @@ public class RangerController : MonoBehaviour, SensorListener
     private void setNextWaypoint()
     {
         currentWaypointIndex = (currentWaypointIndex + 1) % waypoints.Length;
-        if (animator.runtimeAnimatorController != null)
-        {
-            // to prevent prefab errors
-            animator.SetFloat("velY", speed / 4.75f);
-        }
     }
 
     //----------------------------------------------------------------
@@ -199,7 +231,7 @@ public class RangerController : MonoBehaviour, SensorListener
         if (animator.runtimeAnimatorController != null)
         {
             // to prevent prefab errors
-            animator.SetFloat("velY", speed / 4.75f);
+            animator.SetFloat("velY", speed * navSpeedToAnimatorSpeedFactor);
         }
     }
 
@@ -217,6 +249,7 @@ public class RangerController : MonoBehaviour, SensorListener
             case RangerState.Chasing:
             case RangerState.HeardSomething:
             case RangerState.RespondingToCall:
+            case RangerState.AtCall:
                 if (Vector3.Distance(targetPosition, transform.position) < captureDistance)
                 {
                     EventManager.TriggerEvent<ThoughtEvent, string, float>("O.O", 2.0f);
@@ -232,7 +265,6 @@ public class RangerController : MonoBehaviour, SensorListener
                 navAgent.SetDestination(targetPosition);
                 navAgent.speed = speed;
                 State = RangerState.Chasing;
-                
                 break;
             case RangerState.Capturing:
                 if (Time.realtimeSinceStartup - timeCaptureEnteredSec > captureTimeSec)
@@ -256,7 +288,6 @@ public class RangerController : MonoBehaviour, SensorListener
                 lastTimeSpottedSec = Time.realtimeSinceStartup;
                 navAgent.SetDestination(targetPosition);
                 navAgent.speed = speed;
-
                 break;
             case RangerState.Dead:
                 break;
@@ -275,7 +306,7 @@ public class RangerController : MonoBehaviour, SensorListener
             case RangerState.Patrolling:
             case RangerState.HeardSomething:
             case RangerState.RespondingToCall:
-                EventManager.TriggerEvent<ThoughtEvent, string, float>("...", 2.0f);
+            case RangerState.AtCall:
                 Alert.State = Alert.States.Question;
                 navAgent.SetDestination(transform.position);
                 lastHeard = sensorSound;
@@ -300,10 +331,12 @@ public class RangerController : MonoBehaviour, SensorListener
         {
             case RangerState.Patrolling:
             case RangerState.RespondingToCall:
+            case RangerState.AtCall:
                 EventManager.TriggerEvent<ThoughtEvent, string, float>("...", 2.0f);
                 navAgent.SetDestination(helpPosition);
                 Alert.State = Alert.States.Question;
                 State = RangerState.RespondingToCall;
+                callForHelpLocation = helpPosition;
                 break;
             case RangerState.HeardSomething:
             case RangerState.Chasing:
@@ -315,10 +348,13 @@ public class RangerController : MonoBehaviour, SensorListener
 
     public void OnPhysical(Vector3 targetPosition)
     {
+        StopWalkAnimation();
+
         switch (State)
         {
             case RangerState.Patrolling:
             case RangerState.RespondingToCall:
+            case RangerState.AtCall:
             case RangerState.HeardSomething:
             case RangerState.Chasing:
             case RangerState.Capturing:
@@ -328,6 +364,22 @@ public class RangerController : MonoBehaviour, SensorListener
                 break;
             case RangerState.Dead:
                 break;
+        }
+    }
+
+    private void StartWalkAnimation()
+    {
+        if (animator.runtimeAnimatorController != null)
+        {
+            animator.SetFloat("velY", speed * navSpeedToAnimatorSpeedFactor);
+        }
+    }
+
+    private void StopWalkAnimation()
+    {
+        if (animator.runtimeAnimatorController != null)
+        {
+            animator.SetFloat("velY", 0.0f);
         }
     }
 }
