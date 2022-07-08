@@ -1,21 +1,23 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
-    public float speed = 1;
+    public float speed = 3.25f;
+    public float turnSpeed = 10f;
     public float grabRadius = 1;
 
     private Animator animator;
     private Vector2 movement;
     private bool isHoldingObject = false;
     private GameObject heldObject;
+    private new Rigidbody rigidbody;
+    private Quaternion previousRot = Quaternion.identity;
 
     // Start is called before the first frame update
     void Start()
     {
+        rigidbody = GetComponent<Rigidbody>();
         animator = GetComponent<Animator>();
         EventManager.TriggerEvent<ThoughtEvent, string, float>("I need a crate", 5.0f);
     }
@@ -23,15 +25,26 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        animator.SetFloat("velX", transform.rotation.y - previousRot.y);
+        previousRot = transform.rotation;
+        animator.SetFloat("velY", movement.magnitude * speed);
     }
 
     // Called once at the end of every frame
     private void FixedUpdate()
     {
         // Move the player
-        animator.SetFloat("velX", Input.GetAxis("Horizontal"));
-        animator.SetFloat("velY", Input.GetAxis("Vertical"));
+        if (movement.magnitude > 0)
+        {
+            var rotation = Quaternion.LookRotation(new Vector3(movement.x, 0, movement.y));
+            rigidbody.MoveRotation(Quaternion.Slerp(rigidbody.rotation, rotation, Time.deltaTime * turnSpeed));
+            rigidbody.velocity = rigidbody.transform.forward * speed;
+        }
+        else
+        {
+            rigidbody.velocity = Vector3.zero;
+        }
+        
         // If an object is being held, move it with the player
         if (isHoldingObject)
         {
