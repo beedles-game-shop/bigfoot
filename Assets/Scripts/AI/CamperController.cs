@@ -23,7 +23,6 @@ public class CamperController : MonoBehaviour, SensorListener
 
     NavMeshAgent navAgent;
     private Animator animator;
-    public float navSpeedToAnimatorSpeedFactor = 0.5f;
 
     public GameObject fleeWaypoint;
 
@@ -46,6 +45,7 @@ public class CamperController : MonoBehaviour, SensorListener
     {
         navAgent = GetComponent<NavMeshAgent>();
         navAgent.updateRotation = false;
+        navAgent.updatePosition = false;
 
         animator = GetComponent<Animator>();
 
@@ -103,8 +103,10 @@ public class CamperController : MonoBehaviour, SensorListener
 
     void OnAnimatorMove()
     {
-        // Update position to agent position
-        transform.position = navAgent.nextPosition;
+        Vector3 position = animator.rootPosition;
+        position.y = navAgent.nextPosition.y;
+        transform.position = position;
+        navAgent.nextPosition = transform.position;
     }
 
     //----------------------------------------------------------------
@@ -196,7 +198,7 @@ public class CamperController : MonoBehaviour, SensorListener
     {
         if (animator.runtimeAnimatorController != null)
         {
-            animator.SetFloat("velY", speed * navSpeedToAnimatorSpeedFactor);
+            animator.SetFloat("velY", navAgent.velocity.magnitude);
         }
     }
 

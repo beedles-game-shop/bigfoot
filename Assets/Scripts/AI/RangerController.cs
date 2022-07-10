@@ -37,7 +37,6 @@ public class RangerController : MonoBehaviour, SensorListener
     
     private NavMeshAgent navAgent;
     private Animator animator;
-    public float navSpeedToAnimatorSpeedFactor = 0.5f;
 
     public GameObject[] waypoints;
     public float captureDistance = 3f;
@@ -71,6 +70,7 @@ public class RangerController : MonoBehaviour, SensorListener
 
         navAgent = GetComponent<NavMeshAgent>();
         navAgent.updateRotation = false;
+        navAgent.updatePosition = false;
         navAgent.speed = speed;
 
         animator = GetComponent<Animator>();
@@ -105,6 +105,8 @@ public class RangerController : MonoBehaviour, SensorListener
     //! point has been reached.
     private void Update()
     {
+        navAgent.speed = speed;
+
         switch (State)
         {
             case RangerState.Patrolling:
@@ -117,6 +119,7 @@ public class RangerController : MonoBehaviour, SensorListener
                         setNextWaypoint();
                     }
                     setTarget();
+                    StartWalkAnimation();
                 }
                 else
                 {
@@ -185,32 +188,13 @@ public class RangerController : MonoBehaviour, SensorListener
         }
     }
 
-
-    //----------------------------------------------------------------
-    //! Adjusts animator and navAgent speeds and rotations.
-    void FixedUpdate()
-    {
-        navAgent.speed = speed;
-
-        if (navAgent.velocity.sqrMagnitude > Mathf.Epsilon)
-        {
-            transform.rotation = Quaternion.LookRotation(navAgent.velocity.normalized);
-        }
-    }
-
     void OnAnimatorMove()
     {
-        // Update position to agent position
-        transform.position = navAgent.nextPosition;
-    }
-
-    //----------------------------------------------------------------
-    //! Points the ranger along its current velocity vector. This is
-    //! to avoid an ice skating effect when slowly rotated by the nav
-    //! agent.
-    private void LateUpdate()
-    {
-        if (navAgent.velocity.sqrMagnitude > Mathf.Epsilon)
+        Vector3 position = animator.rootPosition;
+        position.y = navAgent.nextPosition.y;
+        transform.position = position;
+        navAgent.nextPosition = transform.position;
+        if (navAgent.velocity.sqrMagnitude > Mathf.Epsilon && State != RangerState.HeardSomething)
         {
             transform.rotation = Quaternion.LookRotation(navAgent.velocity.normalized);
         }
@@ -228,11 +212,6 @@ public class RangerController : MonoBehaviour, SensorListener
     private void setTarget()
     {
         navAgent.SetDestination(waypoints[currentWaypointIndex].transform.position);
-        if (animator.runtimeAnimatorController != null)
-        {
-            // to prevent prefab errors
-            animator.SetFloat("velY", speed * navSpeedToAnimatorSpeedFactor);
-        }
     }
 
     //----------------------------------------------------------------
@@ -308,10 +287,10 @@ public class RangerController : MonoBehaviour, SensorListener
             case RangerState.RespondingToCall:
             case RangerState.AtCall:
                 Alert.State = Alert.States.Question;
+                State = RangerState.HeardSomething;
                 navAgent.SetDestination(transform.position);
                 lastHeard = sensorSound;
                 lastTimeHeardSec = Time.realtimeSinceStartup;
-                State = RangerState.HeardSomething;
                 break;
             case RangerState.Chasing:
             case RangerState.Capturing:
@@ -371,7 +350,7 @@ public class RangerController : MonoBehaviour, SensorListener
     {
         if (animator.runtimeAnimatorController != null)
         {
-            animator.SetFloat("velY", speed * navSpeedToAnimatorSpeedFactor);
+            animator.SetFloat("velY", navAgent.velocity.magnitude);
         }
     }
 
