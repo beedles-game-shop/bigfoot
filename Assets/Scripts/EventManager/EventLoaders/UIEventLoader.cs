@@ -53,13 +53,13 @@ public class UIEventLoader : MonoBehaviour
         spriteMap = new Dictionary<string, Sprite>(){
             {"cube", Resources.Load<Sprite>("Images/box")},
             {"ball", Resources.Load<Sprite>("Images/ball")},
-            {"chair", Resources.Load<Sprite>("Images/chair")},
+            {"chair", Resources.Load<Sprite>("Images/CampChair")},
             {"table", Resources.Load<Sprite>("Images/table")},
-            {"lamp", Resources.Load<Sprite>("Images/lamp")},
-            {"picture", Resources.Load<Sprite>("Images/picture")},
-            {"box", Resources.Load<Sprite>("Images/box2")},
+            {"lamp", Resources.Load<Sprite>("Images/Lamp")},
+            {"picture", Resources.Load<Sprite>("Images/PictureFrame")},
+            {"box", Resources.Load<Sprite>("Images/crate")},
             {"flashlight-old", Resources.Load<Sprite>("Images/lamp")},
-            {"supply-drop-fabric", Resources.Load<Sprite>("Images/box2")}
+            {"supply-drop-fabric", Resources.Load<Sprite>("Images/crate")}
         };
 
         // Build Collection Goal Images
@@ -170,7 +170,7 @@ public class UIEventLoader : MonoBehaviour
             GameObject newObj = new GameObject();
             Image newImg = newObj.AddComponent<Image>();
             newImg.sprite = sprite;
-            newImg.rectTransform.sizeDelta = new Vector2(40, 40);
+            newImg.rectTransform.sizeDelta = new Vector2(100, 100);
 
             RectTransform rt = newObj.GetComponent<RectTransform>();
             rt.SetParent(collectPanel.transform);
