@@ -398,6 +398,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 983079951}
     m_Modifications:
     - target: {fileID: -7021835013711551281, guid: 4fd12b08cff1cd141b4139a81f28886e, type: 3}
+      propertyPath: speed
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -7021835013711551281, guid: 4fd12b08cff1cd141b4139a81f28886e, type: 3}
       propertyPath: fleeWaypoint
       value: 
       objectReference: {fileID: 804953039}
@@ -3718,6 +3722,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 983079951}
     m_Modifications:
+    - target: {fileID: -7021835013711551281, guid: 0ab4b849489e0994a8aa01d277a85ddd, type: 3}
+      propertyPath: speed
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: -7021835013711551281, guid: 0ab4b849489e0994a8aa01d277a85ddd, type: 3}
       propertyPath: fleeWaypoint
       value: 
@@ -7297,7 +7305,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 198330620048313159, guid: 8f4d3aba7cf16a84cb202852524c6500, type: 3}
       propertyPath: speed
-      value: 1
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 198330620048313159, guid: 8f4d3aba7cf16a84cb202852524c6500, type: 3}
+      propertyPath: runSpeed
+      value: 0.75
+      objectReference: {fileID: 0}
+    - target: {fileID: 198330620048313159, guid: 8f4d3aba7cf16a84cb202852524c6500, type: 3}
+      propertyPath: walkSpeed
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 198330620048313159, guid: 8f4d3aba7cf16a84cb202852524c6500, type: 3}
       propertyPath: animatorSpeed
@@ -7387,14 +7403,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 6409268340190213769, guid: 8f4d3aba7cf16a84cb202852524c6500, type: 3}
-      propertyPath: m_Avatar
-      value: 
-      objectReference: {fileID: 9000000, guid: a81d8d74b2ef46743bc278a30e17553c, type: 3}
-    - target: {fileID: 6409268340190213769, guid: 8f4d3aba7cf16a84cb202852524c6500, type: 3}
-      propertyPath: m_Controller
-      value: 
-      objectReference: {fileID: 9100000, guid: 09db8fafc0315a048972c821ef0f20c3, type: 2}
     - target: {fileID: 6506140974141651804, guid: 8f4d3aba7cf16a84cb202852524c6500, type: 3}
       propertyPath: audibleRadius
       value: 3.71

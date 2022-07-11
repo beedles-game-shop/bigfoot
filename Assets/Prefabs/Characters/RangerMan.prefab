@@ -1600,7 +1600,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47583aef934f6e642aef57c2829b0201, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  navSpeedToAnimatorSpeedFactor: 0.5
   waypoints: []
   captureDistance: 5
   captureTimeSec: 1
@@ -2010,7 +2009,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6519788658600731344}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: 0}
+  m_LocalPosition: {x: 0, y: 0.7, z: 0.3}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 5310361602618160637}
@@ -2065,7 +2064,7 @@ Light:
   m_RenderMode: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 1527
+    m_Bits: 4294967295
   m_RenderingLayerMask: 1
   m_Lightmapping: 1
   m_LightShadowCasterMode: 0
@@ -2793,7 +2792,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3322965044117285737}
-  m_Layer: 11
+  m_Layer: 0
   m_Name: Geometry
   m_TagString: Untagged
   m_Icon: {fileID: 0}
