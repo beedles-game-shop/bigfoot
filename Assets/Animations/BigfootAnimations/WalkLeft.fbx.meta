@@ -38,7 +38,7 @@ ModelImporter:
       name: WalkLeft
       takeName: mixamo.com
       internalID: 0
-      firstFrame: 0
+      firstFrame: 26.7
       lastFrame: 32
       wrapMode: 0
       orientationOffsetY: 0
