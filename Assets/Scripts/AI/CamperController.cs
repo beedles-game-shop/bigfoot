@@ -72,32 +72,33 @@ public class CamperController : MonoBehaviour, SensorListener
         {
             case CamperState.Idling:
             case CamperState.HeardSomething:
-                StopWalkAnimation();
+                navAgent.speed = 0.0f;
                 break;
             case CamperState.Fleeing:
-                StartWalkAnimation();
+                navAgent.speed = speed;
                 Vector3 vectorToTarget = fleeWaypoint.transform.position - transform.position;
                 vectorToTarget.y = 0;
+
                 if (vectorToTarget.magnitude - navAgent.stoppingDistance < 0.5f && !navAgent.pathPending)
                 {
                     State = CamperState.AtSafeSpace;
                 }
                 break;
             case CamperState.AtSafeSpace:
-                StopWalkAnimation();
+                navAgent.speed = 0.0f;
                 break;
         }
-    }
 
-    //----------------------------------------------------------------
-    //! Adjusts animator and navAgent speeds and rotations.
-    void FixedUpdate()
-    {
-        navAgent.speed = speed;
-
-        if (navAgent.velocity.sqrMagnitude > Mathf.Epsilon)
+        if (animator.runtimeAnimatorController != null)
         {
-            transform.rotation = Quaternion.LookRotation(navAgent.velocity.normalized);
+            if (navAgent.velocity.magnitude > 0.1f)
+            {
+                animator.SetFloat("velY", navAgent.velocity.magnitude);
+            }
+            else
+            {
+                animator.SetFloat("velY", 0.0f);
+            }
         }
     }
 
@@ -107,6 +108,11 @@ public class CamperController : MonoBehaviour, SensorListener
         position.y = navAgent.nextPosition.y;
         transform.position = position;
         navAgent.nextPosition = transform.position;
+
+        if (navAgent.velocity.sqrMagnitude > 0.1f && State != CamperState.AtSafeSpace)
+        {
+            transform.rotation = Quaternion.LookRotation(navAgent.velocity.normalized);
+        }
     }
 
     //----------------------------------------------------------------
@@ -191,22 +197,6 @@ public class CamperController : MonoBehaviour, SensorListener
                 break;
             case CamperState.Dead:
                 break;
-        }
-    }
-
-    private void StartWalkAnimation()
-    {
-        if (animator.runtimeAnimatorController != null)
-        {
-            animator.SetFloat("velY", navAgent.velocity.magnitude);
-        }
-    }
-
-    private void StopWalkAnimation()
-    {
-        if (animator.runtimeAnimatorController != null)
-        {
-            animator.SetFloat("velY", 0.0f);
         }
     }
 }
