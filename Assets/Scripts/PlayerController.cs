@@ -6,6 +6,7 @@ public class PlayerController : MonoBehaviour
     public float speed = 3.25f;
     public float turnSpeed = 10f;
     public float grabRadius = 1;
+    public float throwForce = 300f;
 
     private Animator animator;
     private Vector2 movement;
@@ -67,11 +68,17 @@ public class PlayerController : MonoBehaviour
         if (isHoldingObject)
         {
             isHoldingObject = false;
-            heldObject.transform.position = playerPosition + new Vector3(0, 0, grabRadius);
+
+            Vector3 up = new Vector3(0, 1.5f, 0);
+            heldObject.transform.position = playerPosition + up + transform.forward * 1.5f;
             heldObject.GetComponent<Collider>().enabled = true;
             heldObject.GetComponent<Rigidbody>().isKinematic = false;
             heldObject.GetComponent<Renderer>().enabled = true;
 
+            Vector3 movement = new Vector3(0, 150, 0);
+            movement = movement + (transform.forward * throwForce);
+
+            heldObject.GetComponent<Rigidbody>().AddForce(movement);
             EventManager.TriggerEvent<ItemDropEvent>();
             return;
         }
