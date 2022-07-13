@@ -1,3 +1,4 @@
+using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -60,9 +61,8 @@ public class PlayerController : MonoBehaviour
         if (isHoldingObject && heldObject.transform.position!= GameObject.Find("mixamorig:RightHand").transform.position)
         {
             isHoldingObject = false;
-            heldObject.GetComponent<Collider>().enabled = false;
+            heldObject.layer = LayerMask.NameToLayer("Collectable");
             heldObject.GetComponent<Rigidbody>().isKinematic = false;
-            heldObject.GetComponent<Rigidbody>().useGravity = true;
             EventManager.TriggerEvent<ItemDropEvent>();
         }
 
@@ -86,9 +86,9 @@ public class PlayerController : MonoBehaviour
 
             Vector3 up = new Vector3(0, 1.5f, 0);
             heldObject.transform.position = playerPosition + up + transform.forward * 1.5f;
-            heldObject.GetComponent<Collider>().enabled = false;
+            heldObject.layer = LayerMask.NameToLayer("Collectable");
             heldObject.GetComponent<Rigidbody>().isKinematic = false;
-            heldObject.GetComponent<Rigidbody>().useGravity = true;currentSpeed = maxSpeed;
+            currentSpeed = maxSpeed;
 
             Vector3 movement = new Vector3(0, 150, 0);
             movement = movement + (transform.forward * throwForce);
@@ -105,7 +105,6 @@ public class PlayerController : MonoBehaviour
         // Check for reachable objects
         Collider[] reachableObjects = Physics.OverlapSphere(playerPosition, grabRadius);
 
-        bool reachableExists = false;        
         for (int i = 0; i < reachableObjects.Length; i++)
         {
             Debug.Log("reachable Object: " + reachableObjects[i]);
@@ -113,12 +112,10 @@ public class PlayerController : MonoBehaviour
             if (reachableObjects[i].gameObject.tag == "Grab")
             {
                 isHoldingObject = true;
-                reachableExists = true;
                 heldObject = reachableObjects[i].gameObject;
                 Debug.Log(heldObject);
-                heldObject.GetComponent<Collider>().enabled = false;
-                heldObject.GetComponent<Rigidbody>().isKinematic = false;
-                heldObject.GetComponent<Rigidbody>().useGravity = false;
+                heldObject.layer = LayerMask.NameToLayer("CarriedCollectable");
+                heldObject.GetComponent<Rigidbody>().isKinematic = true;
                 currentSpeed = Mathf.Max(
                     maxSpeed - (heldObject.GetComponent<Rigidbody>().mass * itemMassImpact),
                     minSpeed
@@ -127,19 +124,18 @@ public class PlayerController : MonoBehaviour
 
                 //Play the carry animation
                 animator.SetBool("carrying", true);
-  
+                return;
             }
-            else if (reachableObjects[i].gameObject.tag == "Radio")
+
+            if (reachableObjects[i].gameObject.tag == "Radio")
             {
-                reachableExists = true;
                 EventManager.TriggerEvent<RadioEvent, GameObject>(reachableObjects[i].gameObject);
                 EventManager.TriggerEvent<ThoughtEvent, string, float>("Radios will distract campers and rangers to their sound. They're hidden around each level, so make sure you explore!", 5.0f);
-            }
-            if (!reachableExists)
-            {
-                EventManager.TriggerEvent<ThoughtEvent, string, float>("There isn't an object to carry.", 2.0f);
+                return;
             }
         }
+        
+        EventManager.TriggerEvent<ThoughtEvent, string, float>("There isn't an object to carry.", 2.0f);
     }
 
     // Called when the player enters a trigger
@@ -164,9 +160,8 @@ public class PlayerController : MonoBehaviour
         {
             isHoldingObject = false;
             heldObject.transform.position = playerPosition + new Vector3(0, 0, grabRadius);
-            heldObject.GetComponent<Collider>().enabled = true;
+            heldObject.layer = LayerMask.NameToLayer("Collectable");
             heldObject.GetComponent<Rigidbody>().isKinematic = false;
-            heldObject.GetComponent<Rigidbody>().useGravity = true;
             //heldObject.tag = "Untagged";
 
             EventManager.TriggerEvent<ItemDropEvent>();
