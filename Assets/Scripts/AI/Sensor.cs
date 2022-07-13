@@ -42,6 +42,30 @@ public class Sensor : MonoBehaviour
         }
     }
 
+    public void OnEnvironmentalSound(Vector3 position, string tag)
+    {
+        audibleTargets.Clear();
+        var origin = eyeTransform.position;
+        var ray = TargetRay(origin, position, false);
+
+        SensorListener.SensorSound sound;
+        if (RaycastTarget(ray))
+        {
+            sound = new SensorListener.SensorSound(position, false, true, tag);
+        }
+        else
+        {
+            sound = new SensorListener.SensorSound(position, true, true, tag);
+        }
+
+        audibleTargets.Add(sound);
+
+        foreach (var sensorListener in sensorListeners)
+        {
+            sensorListener.OnSoundHeard(sound);
+        }
+    }
+
     IEnumerator FindTargetsWithDelay(float delay)
     {
         while (true)
@@ -62,7 +86,7 @@ public class Sensor : MonoBehaviour
         {
             var position = target.bounds.center;
             var ray = TargetRay(origin, position, true);
-            Debug.DrawRay(ray.origin, ray.direction*viewRadius, Color.magenta);
+            Debug.DrawRay(ray.origin, ray.direction * viewRadius, Color.magenta);
 
             if (RaycastTarget(ray))
             {
@@ -111,11 +135,11 @@ public class Sensor : MonoBehaviour
 
             if (RaycastTarget(ray))
             {
-                audibleTargets.Add(new SensorListener.SensorSound(position, false));
+                audibleTargets.Add(new SensorListener.SensorSound(position, false, false, target.tag));
             }
             else
             {
-                audibleTargets.Add(new SensorListener.SensorSound(position, true));
+                audibleTargets.Add(new SensorListener.SensorSound(position, true, false, target.tag));
             }
         }
 
@@ -148,13 +172,21 @@ public interface SensorListener
 {
     public struct SensorSound
     {
-        public SensorSound(Vector3 targetPosition, bool muted)
+        public SensorSound(Vector3 targetPosition, bool muted, bool environmental, string tag)
         {
             Muted = muted;
             TargetPosition = targetPosition;
+            Environmental = environmental;
+            Tag = tag;
         }
 
+        // False when sound is line-of-sight
         public bool Muted { get; }
+
+        // True when sound is triggered by the environment (stepping on a branch, etc.)
+        public bool Environmental { get; }
+
+        public string Tag { get; }
 
         public Vector3 TargetPosition { get; }
     }

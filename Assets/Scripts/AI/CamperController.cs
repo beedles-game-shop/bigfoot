@@ -11,6 +11,9 @@ public class CamperController : MonoBehaviour, SensorListener
     {
         Idling,
         HeardSomething,
+        ReturningToStart,
+        MovingToPointOfInterest,
+        AtPointOfInterest,
         Fleeing,
         AtSafeSpace,
         Dead,
@@ -26,15 +29,27 @@ public class CamperController : MonoBehaviour, SensorListener
 
     public GameObject fleeWaypoint;
 
-    public float speed = 1f;
+    public float walkSpeed = 0.5f;
+    public float runSpeed = 0.75f;
 
     private CamperState state;
+    private Vector3 pointOfInterest;
+    private float lastTimeHeardSec;
+    private SensorListener.SensorSound lastHeard;
+    private float secondsToRemainAlerted = 5f;
+    private Vector3 startPosition;
+    private float timeArrivedAtPOILocation;
+    private float secondsToStayAtPOILocation = 5f;
+
     private CamperState State
     {
         get => state;
         set
         {
-            Debug.Log($"Camper: {state}->{value}");
+            if (state != value)
+            {
+                Debug.Log($"Camper: {state}->{value}");
+            }
             state = value;
         }
     }
@@ -63,6 +78,7 @@ public class CamperController : MonoBehaviour, SensorListener
 
         State = CamperState.Idling;
         Alert.State = Alert.States.None;
+        startPosition = transform.position;
     }
 
     // Update is called once per frame
@@ -70,22 +86,74 @@ public class CamperController : MonoBehaviour, SensorListener
     {
         switch (State)
         {
-            case CamperState.Idling:
             case CamperState.HeardSomething:
-                navAgent.speed = 0.0f;
+                if (Time.realtimeSinceStartup - lastTimeHeardSec > secondsToRemainAlerted)
+                {
+                    Alert.State = Alert.States.None;
+                    navAgent.speed = walkSpeed;
+                    navAgent.SetDestination(startPosition);
+                    State = CamperState.ReturningToStart;
+                    break;
+                }
+
+                var look = lastHeard.TargetPosition - transform.position;
+                look.y = 0;
+                var rotation = Quaternion.LookRotation(look);
+                transform.rotation = Quaternion.Slerp(transform.rotation, rotation, Time.deltaTime * 0.8f);
+
+                if (Quaternion.Angle(transform.rotation, rotation) < 20f)
+                {
+                    navAgent.SetDestination(pointOfInterest);
+                    navAgent.speed = walkSpeed;
+                    Alert.State = Alert.States.Question;
+                    State = CamperState.MovingToPointOfInterest;
+                }
+
                 break;
             case CamperState.Fleeing:
-                navAgent.speed = speed;
                 Vector3 vectorToTarget = fleeWaypoint.transform.position - transform.position;
                 vectorToTarget.y = 0;
 
                 if (vectorToTarget.magnitude - navAgent.stoppingDistance < 0.5f && !navAgent.pathPending)
                 {
+                    Alert.State = Alert.States.None;
                     State = CamperState.AtSafeSpace;
                 }
                 break;
             case CamperState.AtSafeSpace:
                 navAgent.speed = 0.0f;
+                break;
+            case CamperState.AtPointOfInterest:
+                if (Time.realtimeSinceStartup - timeArrivedAtPOILocation > secondsToStayAtPOILocation)
+                {
+                    Alert.State = Alert.States.None;
+                    navAgent.speed = walkSpeed;
+                    navAgent.SetDestination(startPosition);
+                    State = CamperState.ReturningToStart;
+                }
+
+                break;
+            case CamperState.MovingToPointOfInterest:
+                if (Vector3.Distance(pointOfInterest, transform.position) - navAgent.stoppingDistance < 0.5f
+                    && !navAgent.pathPending)
+                {
+                    Alert.State = Alert.States.None;
+                    timeArrivedAtPOILocation = Time.realtimeSinceStartup;
+                    State = CamperState.AtPointOfInterest;
+                }
+
+                break;
+            case CamperState.ReturningToStart:
+                if (Vector3.Distance(startPosition, transform.position) - navAgent.stoppingDistance < 0.5f
+                    && !navAgent.pathPending)
+                {
+                    Alert.State = Alert.States.None;
+                    State = CamperState.Idling;
+                }
+
+                break;
+            case CamperState.Idling:
+            case CamperState.Dead:
                 break;
         }
 
@@ -125,7 +193,10 @@ public class CamperController : MonoBehaviour, SensorListener
     {
         switch (State)
         {
+            case CamperState.MovingToPointOfInterest:
+            case CamperState.ReturningToStart:
             case CamperState.Idling:
+            case CamperState.AtPointOfInterest:
             case CamperState.HeardSomething:
                 Alert.State = Alert.States.Exclamation;
                 alertNearestRanger();
@@ -134,6 +205,7 @@ public class CamperController : MonoBehaviour, SensorListener
                 State = CamperState.Fleeing;
                 break;
             case CamperState.Fleeing:
+                navAgent.speed = runSpeed;
                 Vector3 vectorToTarget = fleeWaypoint.transform.position - transform.position;
                 vectorToTarget.y = 0;
                 if (vectorToTarget.magnitude - navAgent.stoppingDistance < 0.5f && !navAgent.pathPending)
@@ -142,6 +214,7 @@ public class CamperController : MonoBehaviour, SensorListener
                 }
                 break;
             case CamperState.AtSafeSpace:
+            case CamperState.Dead:
                 break;
         }
     }
@@ -153,7 +226,30 @@ public class CamperController : MonoBehaviour, SensorListener
     //!     \param sensorSound information about the sound
     public void OnSoundHeard(SensorListener.SensorSound sensorSound)
     {
-        EventManager.TriggerEvent<ThoughtEvent, string, float>("...", 2.0f);
+        switch (State)
+        {
+            case CamperState.MovingToPointOfInterest:
+            case CamperState.ReturningToStart:
+            case CamperState.AtPointOfInterest:
+            case CamperState.Idling:
+                Alert.State = Alert.States.Question;
+                EventManager.TriggerEvent<ThoughtEvent, string, float>("...", 2.0f);
+                State = CamperState.HeardSomething;
+                navAgent.speed = 0.0f;
+                lastHeard = sensorSound;
+                lastTimeHeardSec = Time.realtimeSinceStartup;
+                pointOfInterest = sensorSound.TargetPosition;
+                break;
+            case CamperState.HeardSomething:
+                lastTimeHeardSec = Time.realtimeSinceStartup;
+                pointOfInterest = sensorSound.TargetPosition;
+                break;
+            case CamperState.Fleeing:
+            case CamperState.AtSafeSpace:
+            case CamperState.Dead:
+                break;
+        }
+        
     }
 
     //----------------------------------------------------------------
@@ -187,13 +283,16 @@ public class CamperController : MonoBehaviour, SensorListener
     {
         switch (State)
         {
+            case CamperState.AtPointOfInterest:
+            case CamperState.MovingToPointOfInterest:
+            case CamperState.ReturningToStart:
             case CamperState.Idling:
             case CamperState.HeardSomething:
             case CamperState.Fleeing:
             case CamperState.AtSafeSpace:
                 EventManager.TriggerEvent<ThoughtEvent, string, float>("T.T", 8.0f);
                 EventManager.TriggerEvent<FailedMenuEvent>();
-                state = CamperState.Dead;
+                State = CamperState.Dead;
                 break;
             case CamperState.Dead:
                 break;
