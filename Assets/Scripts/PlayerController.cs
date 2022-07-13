@@ -7,6 +7,7 @@ public class PlayerController : MonoBehaviour
     public float minSpeed = 1f;
     public float turnSpeed = 10f;
     public float grabRadius = 1;
+    public float throwForce = 300f;
     public float itemMassImpact = 0.1f; // How strongly a held item's mass affects bigfoot's speed
 
     private Animator animator;
@@ -68,12 +69,18 @@ public class PlayerController : MonoBehaviour
         if (isHoldingObject)
         {
             isHoldingObject = false;
-            heldObject.transform.position = playerPosition + new Vector3(0, 0, grabRadius);
+
+            Vector3 up = new Vector3(0, 1.5f, 0);
+            heldObject.transform.position = playerPosition + up + transform.forward * 1.5f;
             heldObject.GetComponent<Collider>().enabled = true;
             heldObject.GetComponent<Rigidbody>().isKinematic = false;
             heldObject.GetComponent<Renderer>().enabled = true;
             currentSpeed = maxSpeed;
 
+            Vector3 movement = new Vector3(0, 150, 0);
+            movement = movement + (transform.forward * throwForce);
+
+            heldObject.GetComponent<Rigidbody>().AddForce(movement);
             EventManager.TriggerEvent<ItemDropEvent>();
             return;
         }
