@@ -6,6 +6,7 @@ public class PlayerController : MonoBehaviour
     public float speed = 3.25f;
     public float turnSpeed = 10f;
     public float grabRadius = 1;
+    public GameObject hands;
 
     private Animator animator;
     private Vector2 movement;
@@ -19,7 +20,7 @@ public class PlayerController : MonoBehaviour
     {
         rigidbody = GetComponent<Rigidbody>();
         animator = GetComponent<Animator>();
-        EventManager.TriggerEvent<ThoughtEvent, string, float>("I need a crate", 5.0f);
+        EventManager.TriggerEvent<ThoughtEvent, string, float>("I should collect some objects.", 5.0f);
     }
 
     // Update is called once per frame
@@ -28,6 +29,7 @@ public class PlayerController : MonoBehaviour
         animator.SetFloat("velX", transform.rotation.y - previousRot.y);
         previousRot = transform.rotation;
         animator.SetFloat("velY", movement.magnitude * speed);
+
     }
 
     // Called once at the end of every frame
@@ -44,12 +46,25 @@ public class PlayerController : MonoBehaviour
         {
             rigidbody.velocity = Vector3.zero;
         }
-        
+
+       
+
         // If an object is being held, move it with the player
         if (isHoldingObject)
         {
-            heldObject.transform.position = gameObject.transform.position;
+            heldObject.transform.position = GameObject.Find("mixamorig:RightHand").transform.position;
         }
+
+        // If the held object is no longer with the player, change the state
+        if (isHoldingObject && heldObject.transform.position!= GameObject.Find("mixamorig:RightHand").transform.position)
+        {
+            isHoldingObject = false;
+            heldObject.GetComponent<Collider>().enabled = false;
+            heldObject.GetComponent<Rigidbody>().isKinematic = false;
+            heldObject.GetComponent<Rigidbody>().useGravity = true;
+            EventManager.TriggerEvent<ItemDropEvent>();
+        }
+
     }
 
     // Called when the input system fires a "Move" event
@@ -68,29 +83,43 @@ public class PlayerController : MonoBehaviour
         {
             isHoldingObject = false;
             heldObject.transform.position = playerPosition + new Vector3(0, 0, grabRadius);
-            heldObject.GetComponent<Collider>().enabled = true;
+            heldObject.GetComponent<Collider>().enabled = false;
             heldObject.GetComponent<Rigidbody>().isKinematic = false;
-            heldObject.GetComponent<Renderer>().enabled = true;
-
+            heldObject.GetComponent<Rigidbody>().useGravity = true;
             EventManager.TriggerEvent<ItemDropEvent>();
+
+            //Stop the grab animation
+            animator.SetBool("carrying", false);
             return;
         }
+
 
         // Check for reachable objects
         Collider[] reachableObjects = Physics.OverlapSphere(playerPosition, grabRadius);
 
+        bool reachableExists = false;        
         for (int i = 0; i < reachableObjects.Length; i++)
         {
-
+            Debug.Log("reachable Object: " + reachableObjects[i]);
             // If the object can be grabbed, pick it up
             if (reachableObjects[i].gameObject.tag == "Grab")
             {
                 isHoldingObject = true;
+                reachableExists = true;
                 heldObject = reachableObjects[i].gameObject;
+                Debug.Log(heldObject);
                 heldObject.GetComponent<Collider>().enabled = false;
-                heldObject.GetComponent<Rigidbody>().isKinematic = true;
-                heldObject.GetComponent<Renderer>().enabled = false;
+                heldObject.GetComponent<Rigidbody>().isKinematic = false;
+                heldObject.GetComponent<Rigidbody>().useGravity = false;
                 EventManager.TriggerEvent<ItemGrabEvent, GameObject>(reachableObjects[i].gameObject);
+
+                //Play the carry animation
+                animator.SetBool("carrying", true);
+  
+            }
+            else if (!reachableExists)
+            {
+                EventManager.TriggerEvent<ThoughtEvent, string, float>("There isn't an object to carry.", 2.0f);
             }
         }
     }
@@ -108,11 +137,19 @@ public class PlayerController : MonoBehaviour
             heldObject.transform.position = playerPosition + new Vector3(0, 0, grabRadius);
             heldObject.GetComponent<Collider>().enabled = true;
             heldObject.GetComponent<Rigidbody>().isKinematic = false;
-            heldObject.GetComponent<Renderer>().enabled = true;
-            heldObject.tag = "Untagged";
+            heldObject.GetComponent<Rigidbody>().useGravity = true;
+            //heldObject.tag = "Untagged";
 
             EventManager.TriggerEvent<ItemDropEvent>();
             EventManager.TriggerEvent<ItemCollectEvent, GameObject>(heldObject);
+
+            //Stop the grab animation
+            animator.SetBool("carrying", false);
         }
+    }
+
+    private void OnAnimatorIK(int layerIndex)
+    {
+        
     }
 }
