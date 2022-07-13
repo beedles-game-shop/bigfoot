@@ -6,11 +6,13 @@ TagManager:
   tags:
   - Grab
   - Cave
+  - Bench
+  - Radio
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Collectable
   - Water
   - UI
   - Obstacle
@@ -18,7 +20,7 @@ TagManager:
   - Camper
   - Ranger
   - Camera
-  - 
+  - CarriedCollectable
   - 
   - 
   - 
