@@ -14,6 +14,18 @@ public class SensorEditor : Editor {
             DrawHearing(sensor);
             DrawVision(sensor);
         }
+
+        var environmentSounds = FindObjectsOfType<EnvironmentSound>();
+        foreach (var environmentSound in environmentSounds)
+        {
+            DrawEnvironmentSound(environmentSound);
+        }
+    }
+
+    private void DrawEnvironmentSound(EnvironmentSound environmentSound)
+    {
+        Handles.color = Color.gray;
+        Handles.DrawWireArc(environmentSound.transform.position, Vector3.up, Vector3.forward, 360, environmentSound.soundRadius);
     }
 
     private void DrawVision(Sensor sensor)

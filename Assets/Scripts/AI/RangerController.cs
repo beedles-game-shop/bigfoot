@@ -14,8 +14,8 @@ public class RangerController : MonoBehaviour, SensorListener
         Patrolling,
         Chasing,
         HeardSomething,
-        RespondingToCall,
-        AtCall,
+        MovingToPointOfInterest,
+        AtPointOfInterest,
         Capturing,
         Dead,
     }
@@ -47,9 +47,9 @@ public class RangerController : MonoBehaviour, SensorListener
 
     private int currentWaypointIndex = -1;
 
-    private Vector3 callForHelpLocation = new Vector3(0, 0, 0);
-    public float secondsToStayAtCallForHelpLocation = 5f;
-    private float timeArrivedAtHelpLocation = -1.0f;
+    private Vector3 pointOfInterest = new Vector3(0, 0, 0);
+    public float secondsToStayAtPOILocation = 5f;
+    private float timeArrivedAtPOILocation = -1.0f;
 
     private GameObject exclamationPoint;
     private GameObject questionMark;
@@ -61,6 +61,7 @@ public class RangerController : MonoBehaviour, SensorListener
     private float lastTimeHeardSec;
 
     public float distanceToTarget = -1;
+    private Sensor sensor;
 
     //----------------------------------------------------------------
     //! Get references to all necessary game components. Sets initial
@@ -73,6 +74,7 @@ public class RangerController : MonoBehaviour, SensorListener
         navAgent.updateRotation = false;
         navAgent.updatePosition = false;
         navAgent.speed = walkSpeed;
+        sensor = GetComponent<Sensor>();
 
         animator = GetComponent<Animator>();
 
@@ -146,8 +148,6 @@ public class RangerController : MonoBehaviour, SensorListener
 
                 break;
             case RangerState.HeardSomething:
-                navAgent.speed = walkSpeed;
-
                 if (Time.realtimeSinceStartup - lastTimeHeardSec > secondsToRemainAlerted)
                 {
                     Alert.State = Alert.States.None;
@@ -158,24 +158,31 @@ public class RangerController : MonoBehaviour, SensorListener
                 var look = lastHeard.TargetPosition - transform.position;
                 look.y = 0;
                 var rotation = Quaternion.LookRotation(look);
-                transform.rotation = Quaternion.Slerp(transform.rotation, rotation, Time.deltaTime * 0.5f);
+                transform.rotation = Quaternion.Slerp(transform.rotation, rotation, Time.deltaTime * 0.8f);
+
+                if (Quaternion.Angle(transform.rotation, rotation) < 20f)
+                {
+                    navAgent.SetDestination(pointOfInterest);
+                    Alert.State = Alert.States.Question;
+                    State = RangerState.MovingToPointOfInterest;
+                }
                 
                 break;
-            case RangerState.RespondingToCall:
+            case RangerState.MovingToPointOfInterest:
                 navAgent.speed = walkSpeed;
 
-                Vector3 vectorToCall = callForHelpLocation - transform.position;
+                Vector3 vectorToCall = pointOfInterest - transform.position;
                 vectorToCall.y = 0;
                 if (vectorToCall.magnitude - navAgent.stoppingDistance < 0.5f && !navAgent.pathPending)
                 {
-                    timeArrivedAtHelpLocation = Time.realtimeSinceStartup;
-                    State = RangerState.AtCall;
+                    timeArrivedAtPOILocation = Time.realtimeSinceStartup;
+                    State = RangerState.AtPointOfInterest;
                 }
                 break;
-            case RangerState.AtCall:
+            case RangerState.AtPointOfInterest:
                 navAgent.speed = 0.0f;
 
-                if (Time.realtimeSinceStartup - timeArrivedAtHelpLocation > secondsToStayAtCallForHelpLocation)
+                if (Time.realtimeSinceStartup - timeArrivedAtPOILocation > secondsToStayAtPOILocation)
                 {
                     Alert.State = Alert.States.None;
                     State = RangerState.Patrolling;
@@ -238,8 +245,8 @@ public class RangerController : MonoBehaviour, SensorListener
             case RangerState.Patrolling:
             case RangerState.Chasing:
             case RangerState.HeardSomething:
-            case RangerState.RespondingToCall:
-            case RangerState.AtCall:
+            case RangerState.MovingToPointOfInterest:
+            case RangerState.AtPointOfInterest:
                 if (Vector3.Distance(targetPosition, transform.position) < captureDistance)
                 {
                     EventManager.TriggerEvent<ThoughtEvent, string, float>("O.O", 2.0f);
@@ -292,14 +299,20 @@ public class RangerController : MonoBehaviour, SensorListener
         switch (State)
         {
             case RangerState.Patrolling:
-            case RangerState.HeardSomething:
-            case RangerState.RespondingToCall:
-            case RangerState.AtCall:
+            case RangerState.MovingToPointOfInterest:
+            case RangerState.AtPointOfInterest:
                 Alert.State = Alert.States.Question;
+                EventManager.TriggerEvent<ThoughtEvent, string, float>("...", 2.0f);
                 State = RangerState.HeardSomething;
-                navAgent.SetDestination(transform.position);
+                navAgent.speed = 0.0f;
                 lastHeard = sensorSound;
                 lastTimeHeardSec = Time.realtimeSinceStartup;
+                pointOfInterest = sensorSound.TargetPosition;
+                break;
+            case RangerState.HeardSomething:
+                lastHeard = sensorSound;
+                lastTimeHeardSec = Time.realtimeSinceStartup;
+                pointOfInterest = sensorSound.TargetPosition;
                 break;
             case RangerState.Chasing:
             case RangerState.Capturing:
@@ -318,13 +331,13 @@ public class RangerController : MonoBehaviour, SensorListener
         switch (State)
         {
             case RangerState.Patrolling:
-            case RangerState.RespondingToCall:
-            case RangerState.AtCall:
+            case RangerState.MovingToPointOfInterest:
+            case RangerState.AtPointOfInterest:
                 EventManager.TriggerEvent<ThoughtEvent, string, float>("...", 2.0f);
                 navAgent.SetDestination(helpPosition);
                 Alert.State = Alert.States.Question;
-                State = RangerState.RespondingToCall;
-                callForHelpLocation = helpPosition;
+                State = RangerState.MovingToPointOfInterest;
+                pointOfInterest = helpPosition;
                 break;
             case RangerState.HeardSomething:
             case RangerState.Chasing:
@@ -339,8 +352,8 @@ public class RangerController : MonoBehaviour, SensorListener
         switch (State)
         {
             case RangerState.Patrolling:
-            case RangerState.RespondingToCall:
-            case RangerState.AtCall:
+            case RangerState.MovingToPointOfInterest:
+            case RangerState.AtPointOfInterest:
             case RangerState.HeardSomething:
             case RangerState.Chasing:
             case RangerState.Capturing:

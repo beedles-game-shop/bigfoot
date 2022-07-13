@@ -1699,7 +1699,7 @@ NavMeshAgent:
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 120
-  m_StoppingDistance: 0
+  m_StoppingDistance: 1
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 1
   m_AutoRepath: 1
@@ -1734,7 +1734,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   fleeWaypoint: {fileID: 0}
-  speed: 0.8
+  walkSpeed: 1
+  runSpeed: 1.5
 --- !u!1 &5119463614954045580
 GameObject:
   m_ObjectHideFlags: 0
