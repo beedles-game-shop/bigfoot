@@ -20,7 +20,7 @@ public class PlayerController : MonoBehaviour
     {
         rigidbody = GetComponent<Rigidbody>();
         animator = GetComponent<Animator>();
-        EventManager.TriggerEvent<ThoughtEvent, string, float>("I should collect some objects.", 5.0f);
+        EventManager.TriggerEvent<ThoughtEvent, string, float>("Collect the items that I need without getting caught by the campers or rangers. We need to keep my existence a mystery!", 5.0f);
     }
 
     // Update is called once per frame
@@ -117,7 +117,13 @@ public class PlayerController : MonoBehaviour
                 animator.SetBool("carrying", true);
   
             }
-            else if (!reachableExists)
+            else if (reachableObjects[i].gameObject.tag == "Radio")
+            {
+                reachableExists = true;
+                EventManager.TriggerEvent<RadioEvent, GameObject>(reachableObjects[i].gameObject);
+                EventManager.TriggerEvent<ThoughtEvent, string, float>("Radios will distract campers and rangers to their sound. They're hidden around each level, so make sure you explore!", 5.0f);
+            }
+            if (!reachableExists)
             {
                 EventManager.TriggerEvent<ThoughtEvent, string, float>("There isn't an object to carry.", 2.0f);
             }
@@ -128,6 +134,17 @@ public class PlayerController : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         Vector3 playerPosition = gameObject.transform.position;
+
+        // If the player is near the bench, trigger a speech bubble
+        if (other.gameObject.tag == "Bench")
+        {
+            EventManager.TriggerEvent<ThoughtEvent, string, float>("We should check out the park bench, it looks like there might be something helpful there!", 2.0f);
+        }
+        // If the player is near the radio, trigger a speech bubble
+        if (other.gameObject.tag == "Radio")
+        {
+            EventManager.TriggerEvent<ThoughtEvent, string, float>("Press space to interact with radio or other objects.", 2.0f);
+        }
 
         // If the player enters the cave while holding an object,
         // drop the object and make it un-grabbable

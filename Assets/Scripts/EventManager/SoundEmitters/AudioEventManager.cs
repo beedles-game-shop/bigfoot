@@ -7,14 +7,19 @@ public class AudioEventManager : MonoBehaviour
 {
     public EventSound3D eventSound3DPrefab;
     public AudioClip bigfootFootstepAudio;
+    public AudioClip radioAudio;
 
     private UnityAction<Vector3> bigfootFootstepEventListener;
+    private UnityAction<GameObject> radioAudioEventListener;
 
     // Start is called before the first frame update
     void Start()
     {
         bigfootFootstepEventListener = new UnityAction<Vector3>(bigfootFootstepEventHandler);
+        radioAudioEventListener = new UnityAction<GameObject>(radioAudioEventHandler);
+
         EventManager.StartListening<BigfootFootstepEvent, Vector3>(bigfootFootstepEventListener);
+        EventManager.StartListening<RadioEvent, GameObject>(radioAudioEventListener);
     }
 
     // Update is called once per frame
@@ -35,5 +40,18 @@ public class AudioEventManager : MonoBehaviour
 
         snd.audioSrc.Play();
         
+    }
+
+    void radioAudioEventHandler(GameObject obj)
+    {
+        EventSound3D snd = Instantiate(eventSound3DPrefab, obj.transform);
+
+        snd.audioSrc.clip = this.radioAudio;
+
+        snd.audioSrc.minDistance = 5f;
+        snd.audioSrc.maxDistance = 100f;
+        snd.audioSrc.volume = 0.8f;
+
+        snd.audioSrc.Play();
     }
 }
