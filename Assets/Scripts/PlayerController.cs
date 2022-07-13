@@ -3,9 +3,11 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
-    public float speed = 3.25f;
+    public float maxSpeed = 3.25f;
+    public float minSpeed = 1f;
     public float turnSpeed = 10f;
     public float grabRadius = 1;
+    public float itemMassImpact = 0.1f; // How strongly a held item's mass affects bigfoot's speed
 
     private Animator animator;
     private Vector2 movement;
@@ -13,6 +15,7 @@ public class PlayerController : MonoBehaviour
     private GameObject heldObject;
     private new Rigidbody rigidbody;
     private Quaternion previousRot = Quaternion.identity;
+    private float currentSpeed;
 
     // Start is called before the first frame update
     void Start()
@@ -20,25 +23,23 @@ public class PlayerController : MonoBehaviour
         rigidbody = GetComponent<Rigidbody>();
         animator = GetComponent<Animator>();
         EventManager.TriggerEvent<ThoughtEvent, string, float>("I need a crate", 5.0f);
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        animator.SetFloat("velX", transform.rotation.y - previousRot.y);
-        previousRot = transform.rotation;
-        animator.SetFloat("velY", movement.magnitude * speed);
+        currentSpeed = maxSpeed;
     }
 
     // Called once at the end of every frame
     private void FixedUpdate()
     {
+        // Set the animation properties
+        animator.SetFloat("velX", transform.rotation.y - previousRot.y);
+        previousRot = transform.rotation;
+        animator.SetFloat("velY", currentSpeed * movement.magnitude);
+
         // Move the player
         if (movement.magnitude > 0)
         {
             var rotation = Quaternion.LookRotation(new Vector3(movement.x, 0, movement.y));
             rigidbody.MoveRotation(Quaternion.Slerp(rigidbody.rotation, rotation, Time.deltaTime * turnSpeed));
-            rigidbody.velocity = rigidbody.transform.forward * speed;
+            rigidbody.velocity = rigidbody.transform.forward * currentSpeed;
         }
         else
         {
@@ -71,6 +72,7 @@ public class PlayerController : MonoBehaviour
             heldObject.GetComponent<Collider>().enabled = true;
             heldObject.GetComponent<Rigidbody>().isKinematic = false;
             heldObject.GetComponent<Renderer>().enabled = true;
+            currentSpeed = maxSpeed;
 
             EventManager.TriggerEvent<ItemDropEvent>();
             return;
@@ -90,7 +92,14 @@ public class PlayerController : MonoBehaviour
                 heldObject.GetComponent<Collider>().enabled = false;
                 heldObject.GetComponent<Rigidbody>().isKinematic = true;
                 heldObject.GetComponent<Renderer>().enabled = false;
+                currentSpeed = Mathf.Max(
+                    maxSpeed - (heldObject.GetComponent<Rigidbody>().mass * itemMassImpact),
+                    minSpeed
+                );
+
                 EventManager.TriggerEvent<ItemGrabEvent, GameObject>(reachableObjects[i].gameObject);
+
+                break;
             }
         }
     }
