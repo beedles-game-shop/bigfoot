@@ -6,6 +6,8 @@ TagManager:
   tags:
   - Grab
   - Cave
+  - Bench
+  - Radio
   layers:
   - Default
   - TransparentFX
@@ -18,7 +20,7 @@ TagManager:
   - Camper
   - Ranger
   - Camera
-  - 
+  - CarriedCollectable
   - 
   - 
   - 

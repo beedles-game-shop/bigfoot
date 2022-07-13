@@ -55,10 +55,9 @@ public class UIEventLoader : MonoBehaviour
             {"ball", Resources.Load<Sprite>("Images/ball")},
             {"chair", Resources.Load<Sprite>("Images/CampChair")},
             {"table", Resources.Load<Sprite>("Images/table")},
-            {"lamp", Resources.Load<Sprite>("Images/Lamp")},
+            {"lantern-storm", Resources.Load<Sprite>("Images/lamp")},
             {"picture", Resources.Load<Sprite>("Images/PictureFrame")},
             {"box", Resources.Load<Sprite>("Images/crate")},
-            {"flashlight-old", Resources.Load<Sprite>("Images/lamp")},
             {"supply-drop-fabric", Resources.Load<Sprite>("Images/crate")}
         };
 
@@ -193,7 +192,7 @@ public class UIEventLoader : MonoBehaviour
         if (message.Length != 0) {
             thoughtText.text = message;
         } else {
-            thoughtText.text = "I need a crate.";
+            thoughtText.text = "I should collect some items.";
         }
 
         thoughtBubbleTimeout = new TimeoutCallback(() =>
