@@ -95,7 +95,7 @@ public class PlayerController : MonoBehaviour
 
             heldObject.GetComponent<Rigidbody>().AddForce(movement);
             EventManager.TriggerEvent<ItemDropEvent>();
-
+            EventManager.TriggerEvent<DropAudioEvent, GameObject>(heldObject);
             //Stop the grab animation
             animator.SetBool("carrying", false);
             return;
@@ -121,7 +121,7 @@ public class PlayerController : MonoBehaviour
                     minSpeed
                 );
                 EventManager.TriggerEvent<ItemGrabEvent, GameObject>(reachableObjects[i].gameObject);
-
+                EventManager.TriggerEvent<PickUpAudioEvent, GameObject>(heldObject);
                 //Play the carry animation
                 animator.SetBool("carrying", true);
                 return;
