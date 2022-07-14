@@ -16,7 +16,8 @@ public class SuccessMenu : MonoBehaviour
     
     public void NextButton()
     {
-        SceneManager.LoadScene(nextLevelName);
+        //SceneManager.LoadScene(nextLevelName);
+        SceneManager.LoadScene("Level1");
         Time.timeScale = 1f;
     }
     
