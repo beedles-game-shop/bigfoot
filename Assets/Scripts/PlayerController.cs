@@ -96,6 +96,11 @@ public class PlayerController : MonoBehaviour
             heldObject.GetComponent<Rigidbody>().AddForce(movement);
             EventManager.TriggerEvent<ItemDropEvent>();
 
+            ItemScript item = heldObject.GetComponent<ItemScript>();
+            if (item != null) {
+                item.Thrown();
+            }
+
             //Stop the grab animation
             animator.SetBool("carrying", false);
             return;
@@ -122,6 +127,9 @@ public class PlayerController : MonoBehaviour
                 );
                 EventManager.TriggerEvent<ItemGrabEvent, GameObject>(reachableObjects[i].gameObject);
 
+                
+                    
+               
                 //Play the carry animation
                 animator.SetBool("carrying", true);
                 return;
