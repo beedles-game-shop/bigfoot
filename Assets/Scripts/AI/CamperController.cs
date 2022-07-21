@@ -27,10 +27,13 @@ public class CamperController : MonoBehaviour, SensorListener
     NavMeshAgent navAgent;
     private Animator animator;
 
-    public GameObject fleeWaypoint;
+    private Vector3 fleeWaypoint;
 
     public float walkSpeed = 0.5f;
     public float runSpeed = 0.75f;
+
+    public float fleeDistance = 10.0f;
+    public bool isAggressive = false;
 
     private CamperState state;
     private Vector3 pointOfInterest;
@@ -111,7 +114,7 @@ public class CamperController : MonoBehaviour, SensorListener
 
                 break;
             case CamperState.Fleeing:
-                Vector3 vectorToTarget = fleeWaypoint.transform.position - transform.position;
+                Vector3 vectorToTarget = fleeWaypoint - transform.position;
                 vectorToTarget.y = 0;
 
                 if (vectorToTarget.magnitude - navAgent.stoppingDistance < 0.5f && !navAgent.pathPending)
@@ -197,23 +200,24 @@ public class CamperController : MonoBehaviour, SensorListener
             case CamperState.ReturningToStart:
             case CamperState.Idling:
             case CamperState.AtPointOfInterest:
+            case CamperState.AtSafeSpace:
             case CamperState.HeardSomething:
                 Alert.State = Alert.States.Exclamation;
                 alertNearestRanger();
-                navAgent.SetDestination(fleeWaypoint.transform.position);
+                ChooseFleeWaypoint(targetPosition);
+                navAgent.SetDestination(fleeWaypoint);
                 EventManager.TriggerEvent<ThoughtEvent, string, float>("...!", 2.0f);
                 State = CamperState.Fleeing;
                 break;
             case CamperState.Fleeing:
                 navAgent.speed = runSpeed;
-                Vector3 vectorToTarget = fleeWaypoint.transform.position - transform.position;
+                Vector3 vectorToTarget = fleeWaypoint - transform.position;
                 vectorToTarget.y = 0;
                 if (vectorToTarget.magnitude - navAgent.stoppingDistance < 0.5f && !navAgent.pathPending)
                 {
                     State = CamperState.AtSafeSpace;
                 }
                 break;
-            case CamperState.AtSafeSpace:
             case CamperState.Dead:
                 break;
         }
@@ -231,6 +235,7 @@ public class CamperController : MonoBehaviour, SensorListener
             case CamperState.MovingToPointOfInterest:
             case CamperState.ReturningToStart:
             case CamperState.AtPointOfInterest:
+            case CamperState.AtSafeSpace:
             case CamperState.Idling:
                 Alert.State = Alert.States.Question;
                 EventManager.TriggerEvent<ThoughtEvent, string, float>("...", 2.0f);
@@ -245,7 +250,6 @@ public class CamperController : MonoBehaviour, SensorListener
                 pointOfInterest = sensorSound.TargetPosition;
                 break;
             case CamperState.Fleeing:
-            case CamperState.AtSafeSpace:
             case CamperState.Dead:
                 break;
         }
@@ -296,6 +300,37 @@ public class CamperController : MonoBehaviour, SensorListener
                 break;
             case CamperState.Dead:
                 break;
+        }
+    }
+
+    void ChooseFleeWaypoint(Vector3 targetPosition)
+    {
+        // watch out
+        if (isAggressive)
+        {
+            fleeWaypoint = targetPosition;
+            return;
+        }
+
+        // get angle between bigfoot and self
+        Vector3 fleeVector = new Vector3(transform.position.x - targetPosition.x, 1, transform.position.z - targetPosition.z);
+
+        // choose spot to flee to
+        fleeWaypoint = transform.position + fleeDistance * fleeVector.normalized;
+
+        // if the waypoint is in an obstacle, rotate to the right until it is not
+        bool keepLooking = true;
+        while (keepLooking)
+        {
+            RaycastHit hitInfo;
+            Ray pointRay = new Ray(fleeWaypoint, new Vector3(0, 0, 0));
+            keepLooking = Physics.Raycast(pointRay, out hitInfo, 0);
+
+            if (keepLooking)
+            {
+                fleeVector = Quaternion.AngleAxis(10, Vector3.up) * fleeVector;
+                fleeWaypoint = transform.position + fleeDistance * fleeVector.normalized;
+            }
         }
     }
 }
