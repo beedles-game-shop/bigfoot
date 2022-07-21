@@ -122,6 +122,7 @@ public class CamperController : MonoBehaviour, SensorListener
                 break;
             case CamperState.AtSafeSpace:
                 navAgent.speed = 0.0f;
+                animator.SetBool("scared", true);
                 break;
             case CamperState.AtPointOfInterest:
                 if (Time.realtimeSinceStartup - timeArrivedAtPOILocation > secondsToStayAtPOILocation)
@@ -297,5 +298,11 @@ public class CamperController : MonoBehaviour, SensorListener
             case CamperState.Dead:
                 break;
         }
+    }
+    
+    //Method to Stop the Scared Animation
+    public void StopScaredAnimation()
+    {
+        animator.SetBool("scared", false);
     }
 }
