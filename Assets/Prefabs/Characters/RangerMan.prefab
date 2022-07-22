@@ -1542,8 +1542,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85c8dc9fb220477893df77fe650df29b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  viewRadius: 5
-  audibleRadius: 5
+  viewRadius: 8
+  audibleRadius: 13
   viewAngle: 90
   targetMask:
     serializedVersion: 2
@@ -1603,9 +1603,10 @@ MonoBehaviour:
   waypoints: []
   captureDistance: 5
   captureTimeSec: 1
-  speed: 0.5
+  walkSpeed: 1
+  runSpeed: 1.5
   secondsToRemainAlerted: 3
-  secondsToStayAtCallForHelpLocation: 5
+  secondsToStayAtPOILocation: 5
   distanceToTarget: -1
 --- !u!1 &4803997335253103114
 GameObject:
