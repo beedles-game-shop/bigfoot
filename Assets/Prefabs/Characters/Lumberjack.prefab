@@ -1733,9 +1733,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: abb5bdc22d799c14e8bbb71ce7d3cd2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fleeWaypoint: {fileID: 0}
   walkSpeed: 1
   runSpeed: 1.5
+  fleeDistance: 10
+  isAggressive: 0
 --- !u!1 &5119463614954045580
 GameObject:
   m_ObjectHideFlags: 0

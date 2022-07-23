@@ -169,7 +169,7 @@ public class RangerController : MonoBehaviour, SensorListener
                 
                 break;
             case RangerState.MovingToPointOfInterest:
-                navAgent.speed = walkSpeed;
+                navAgent.speed = runSpeed;
 
                 Vector3 vectorToCall = pointOfInterest - transform.position;
                 vectorToCall.y = 0;
