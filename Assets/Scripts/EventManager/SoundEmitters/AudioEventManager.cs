@@ -57,6 +57,11 @@ public class AudioEventManager : MonoBehaviour
         snd.audioSrc.volume = 0.8f;
 
         snd.audioSrc.Play();
+
+        ItemScript item = obj.GetComponent<ItemScript>();
+        if (item != null) {
+            item.alertNearestRanger();
+        }
     }
     void tripAudioEventHandler(GameObject obj)
     {

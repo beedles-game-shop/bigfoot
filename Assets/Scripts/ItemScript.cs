@@ -13,7 +13,7 @@ public class ItemScript : MonoBehaviour
         Debug.Log("item thrown");
     }
 
-    private void alertNearestRanger()
+    public void alertNearestRanger()
     {
         var allGameObjects = FindObjectsOfType<GameObject>();
         float closestRangerDistance = Mathf.Infinity;
