@@ -151,37 +151,42 @@ public class UIEventLoader : MonoBehaviour
         collectImageMap = new Dictionary<string, Image>();
         float setY = -50;
 
-        foreach (GameObject g in itemsToCollect){
-            Sprite sprite = null;
+        if (itemsToCollect != null)
+        {
+            foreach (GameObject g in itemsToCollect)
+            {
+                Sprite sprite = null;
 
-            // set tag to grabable item, in case it is not set
-            g.tag = "Grab";
+                // set tag to grabable item, in case it is not set
+                g.tag = "Grab";
 
-            // get sprite image for object
-            string key = g.name.ToLower();
-            Debug.Log(key);
-            if(!spriteMap.TryGetValue(key, out sprite)){
-                sprite = Resources.Load<Sprite>("Images/box");
-                Debug.Log("sprite not found in map");
+                // get sprite image for object
+                string key = g.name.ToLower();
+                Debug.Log(key);
+                if (!spriteMap.TryGetValue(key, out sprite))
+                {
+                    sprite = Resources.Load<Sprite>("Images/box");
+                    Debug.Log("sprite not found in map");
+                }
+
+                // generate new image in collect list
+                GameObject newObj = new GameObject();
+                Image newImg = newObj.AddComponent<Image>();
+                newImg.sprite = sprite;
+                newImg.rectTransform.sizeDelta = new Vector2(100, 100);
+
+                RectTransform rt = newObj.GetComponent<RectTransform>();
+                rt.SetParent(collectPanel.transform);
+                rt.anchorMin = new Vector2(0.5f, 1.0f);
+                rt.anchorMax = new Vector2(0.5f, 1.0f);
+                rt.anchoredPosition = new Vector2(0, setY);
+                setY -= 60;
+                // newObj.name = "test";
+
+                newObj.SetActive(true);
+
+                collectImageMap.Add(key, newImg);
             }
-
-            // generate new image in collect list
-            GameObject newObj = new GameObject();
-            Image newImg = newObj.AddComponent<Image>();
-            newImg.sprite = sprite;
-            newImg.rectTransform.sizeDelta = new Vector2(100, 100);
-
-            RectTransform rt = newObj.GetComponent<RectTransform>();
-            rt.SetParent(collectPanel.transform);
-            rt.anchorMin = new Vector2(0.5f, 1.0f);
-            rt.anchorMax = new Vector2(0.5f, 1.0f);
-            rt.anchoredPosition = new Vector2(0, setY);
-            setY -= 60;
-            // newObj.name = "test";
-            
-            newObj.SetActive(true);
-
-            collectImageMap.Add(key, newImg);
         }
     }
 
