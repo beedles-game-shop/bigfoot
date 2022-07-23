@@ -111,7 +111,7 @@ public class UIEventLoader : MonoBehaviour
 
         // If object is an item to collect
         if(collectImageMap.TryGetValue(key, out img)){
-            EventManager.TriggerEvent<ThoughtEvent, string, float>("Let's go home", 5.0f);
+            EventManager.TriggerEvent<ThoughtEvent, string, float>("Let's go home! Press space again to throw an item. Items thrown at rangers can trigger, or distract them.", 5.0f);
         }
 
         inventoryBlock.sprite = sprite;
