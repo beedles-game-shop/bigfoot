@@ -10,18 +10,6 @@ public class SpeedUp : MonoBehaviour
     private bool isTriggered = false;
     private PlayerController playerController;
 
-    private void Update()
-    {
-        if (!isTriggered) return;
-
-        print(duration);
-        duration -= Time.deltaTime;
-
-        if (duration <= 0)
-        {
-            playerController.maxSpeed -= modifier;
-        }
-    }
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.tag == "Player")

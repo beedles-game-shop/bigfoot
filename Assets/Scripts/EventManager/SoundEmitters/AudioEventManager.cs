@@ -40,7 +40,7 @@ public class AudioEventManager : MonoBehaviour
 
         snd.audioSrc.minDistance = 5f;
         snd.audioSrc.maxDistance = 100f;
-        snd.audioSrc.volume = 0.25f;
+        snd.audioSrc.volume = 0.02f;
 
         snd.audioSrc.Play();
         
