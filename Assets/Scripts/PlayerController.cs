@@ -2,7 +2,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class TutorialPlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviour
 {
     public float maxSpeed = 3.25f;
     public float minSpeed = 1f;
@@ -19,6 +19,8 @@ public class TutorialPlayerController : MonoBehaviour
     private new Rigidbody rigidbody;
     private Quaternion previousRot = Quaternion.identity;
     private float currentSpeed;
+    private float speedModifier = 0;
+    private float modifierDuration = 0;
 
     //Booleans for tutorial prompts
     private bool radioPrompted = false;
@@ -32,12 +34,25 @@ public class TutorialPlayerController : MonoBehaviour
         rigidbody = GetComponent<Rigidbody>();
         animator = GetComponent<Animator>();
         EventManager.TriggerEvent<ThoughtEvent, string, float>("Collect the items that I need without getting caught by the campers or rangers. We need to keep my existence a mystery!", 5.0f);
-        currentSpeed = maxSpeed;
+        currentSpeed = maxSpeed + speedModifier;
     }
 
     // Called once at the end of every frame
     private void FixedUpdate()
     {
+        print(modifierDuration);
+        // Remove the speed modifier when the duration has passed
+        if (
+            modifierDuration > 0 &&
+            (modifierDuration -= Time.deltaTime) < 0
+        )
+        {
+            currentSpeed -= speedModifier;
+            maxSpeed -= speedModifier;
+            speedModifier = 0;
+            modifierDuration = 0;
+        }
+
         // Set the animation properties
         animator.SetFloat("velX", transform.rotation.y - previousRot.y);
         previousRot = transform.rotation;
@@ -210,8 +225,16 @@ public class TutorialPlayerController : MonoBehaviour
         animator.SetBool("interacting", false);
     }
 
-    private void OnAnimatorIK(int layerIndex)
+    // Sets the speed modifier and updates bigfoot's speed accordingly
+    public void SetSpeedModifier (float modifier, float duration)
     {
-        
+        // Do nothing if the current modifier is greater than the new one
+        if (speedModifier > modifier) return;
+
+        speedModifier = modifier;
+        modifierDuration = duration;
+
+        currentSpeed += modifier;
+        maxSpeed += modifier;
     }
 }
