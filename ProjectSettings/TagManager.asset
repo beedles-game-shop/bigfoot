@@ -8,6 +8,28 @@ TagManager:
   - Cave
   - Bench
   - Radio
+  - Camper
+  - ObstacleRadius
+  - Obstacle
+  - Campsite
+  - P
+  - Pl
+  - Pla
+  - Play
+  - Playe
+  - W
+  - Wa
+  - Way
+  - Wayp
+  - Waypo
+  - Waypoi
+  - Waypoin
+  - Waypoint
+  - WaypointA
+  - WaypointAr
+  - WaypointArr
+  - WaypointArro
+  - WaypointArrow
   layers:
   - Default
   - TransparentFX
@@ -23,7 +45,7 @@ TagManager:
   - CarriedCollectable
   - 
   - 
-  - 
+  - WaypointArrow
   - 
   - 
   - 
