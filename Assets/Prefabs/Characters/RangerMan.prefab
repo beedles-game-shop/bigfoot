@@ -1603,8 +1603,8 @@ MonoBehaviour:
   waypoints: []
   captureDistance: 5
   captureTimeSec: 1
-  walkSpeed: 1
-  runSpeed: 1.5
+  walkSpeed: 0.5
+  runSpeed: 0.75
   secondsToRemainAlerted: 3
   secondsToStayAtPOILocation: 5
   distanceToTarget: -1
