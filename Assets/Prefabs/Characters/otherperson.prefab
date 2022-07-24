@@ -1765,8 +1765,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85c8dc9fb220477893df77fe650df29b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  viewRadius: 5
-  audibleRadius: 0
+  viewRadius: 8
+  audibleRadius: 13
   viewAngle: 60
   targetMask:
     serializedVersion: 2
@@ -1823,9 +1823,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: abb5bdc22d799c14e8bbb71ce7d3cd2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fleeWaypoint: {fileID: 0}
   walkSpeed: 0.5
   runSpeed: 0.75
+  fleeDistance: 10
+  isAggressive: 0
 --- !u!1 &5148866429259707185
 GameObject:
   m_ObjectHideFlags: 0

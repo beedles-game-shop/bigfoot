@@ -299,7 +299,6 @@ public class RangerController : MonoBehaviour, SensorListener
         switch (State)
         {
             case RangerState.Patrolling:
-            case RangerState.MovingToPointOfInterest:
             case RangerState.AtPointOfInterest:
                 Alert.State = Alert.States.Question;
                 EventManager.TriggerEvent<ThoughtEvent, string, float>("...", 2.0f);
@@ -310,6 +309,7 @@ public class RangerController : MonoBehaviour, SensorListener
                 pointOfInterest = sensorSound.TargetPosition;
                 break;
             case RangerState.HeardSomething:
+            case RangerState.MovingToPointOfInterest:
                 lastHeard = sensorSound;
                 lastTimeHeardSec = Time.realtimeSinceStartup;
                 pointOfInterest = sensorSound.TargetPosition;

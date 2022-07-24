@@ -1146,10 +1146,6 @@ PrefabInstance:
       propertyPath: m_LocalRotation.z
       value: 0.004543769
       objectReference: {fileID: 0}
-    - target: {fileID: 5512803587545010215, guid: 4fd12b08cff1cd141b4139a81f28886e, type: 3}
-      propertyPath: audibleRadius
-      value: -3.56
-      objectReference: {fileID: 0}
     - target: {fileID: 5513776117293719822, guid: 4fd12b08cff1cd141b4139a81f28886e, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.04922289
@@ -6078,10 +6074,6 @@ PrefabInstance:
       propertyPath: m_LocalRotation.z
       value: 0.041724112
       objectReference: {fileID: 0}
-    - target: {fileID: 5512803587545010215, guid: 0ab4b849489e0994a8aa01d277a85ddd, type: 3}
-      propertyPath: audibleRadius
-      value: 3.63
-      objectReference: {fileID: 0}
     - target: {fileID: 5526029409217947447, guid: 0ab4b849489e0994a8aa01d277a85ddd, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.04418138
@@ -10351,14 +10343,6 @@ PrefabInstance:
       value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 198330620048313159, guid: 8f4d3aba7cf16a84cb202852524c6500, type: 3}
-      propertyPath: runSpeed
-      value: 0.75
-      objectReference: {fileID: 0}
-    - target: {fileID: 198330620048313159, guid: 8f4d3aba7cf16a84cb202852524c6500, type: 3}
-      propertyPath: walkSpeed
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 198330620048313159, guid: 8f4d3aba7cf16a84cb202852524c6500, type: 3}
       propertyPath: animatorSpeed
       value: 1
       objectReference: {fileID: 0}
@@ -11425,10 +11409,6 @@ PrefabInstance:
     - target: {fileID: 6379689806842348901, guid: 8f4d3aba7cf16a84cb202852524c6500, type: 3}
       propertyPath: m_LocalRotation.z
       value: -0.026324088
-      objectReference: {fileID: 0}
-    - target: {fileID: 6506140974141651804, guid: 8f4d3aba7cf16a84cb202852524c6500, type: 3}
-      propertyPath: audibleRadius
-      value: 3.71
       objectReference: {fileID: 0}
     - target: {fileID: 6544392062063550474, guid: 8f4d3aba7cf16a84cb202852524c6500, type: 3}
       propertyPath: m_LocalPosition.x
