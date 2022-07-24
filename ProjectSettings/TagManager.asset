@@ -8,6 +8,15 @@ TagManager:
   - Cave
   - Bench
   - Radio
+  - Camper
+  - ObstacleRadius
+  - Obstacle
+  - Campsite
+  - P
+  - Pl
+  - Pla
+  - Play
+  - Playe
   layers:
   - Default
   - TransparentFX
@@ -21,7 +30,7 @@ TagManager:
   - Ranger
   - Camera
   - CarriedCollectable
-  - 
+  - PowerUp
   - 
   - 
   - 
