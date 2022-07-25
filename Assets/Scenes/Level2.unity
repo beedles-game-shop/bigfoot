@@ -222,22 +222,6 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 2.1578553, y: 0.11083059, z: 0.15877128}
   m_Center: {x: -0.032969832, y: 0.04600457, z: -0.017336298}
---- !u!114 &23892806
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 23892800}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e9a90d87d9d0a944ea50fbaa3a075b01, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  soundRadius: 10
-  targetMask:
-    serializedVersion: 2
-    m_Bits: 128
 --- !u!1001 &50728637
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3699,22 +3683,6 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 7226216439287943936, guid: b30e2e59516d7724b9e394163dbd0b2c, type: 3}
   m_PrefabInstance: {fileID: 635621458}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &635621460
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 635621459}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e9a90d87d9d0a944ea50fbaa3a075b01, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  soundRadius: 10
-  targetMask:
-    serializedVersion: 2
-    m_Bits: 128
 --- !u!65 &635621461
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -14013,22 +13981,6 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 7226216439287943936, guid: b30e2e59516d7724b9e394163dbd0b2c, type: 3}
   m_PrefabInstance: {fileID: 2141611416}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &2141611418
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2141611417}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e9a90d87d9d0a944ea50fbaa3a075b01, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  soundRadius: 10
-  targetMask:
-    serializedVersion: 2
-    m_Bits: 128
 --- !u!65 &2141611419
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -14513,8 +14465,8 @@ GameObject:
   - component: {fileID: 270962528}
   - component: {fileID: 270962533}
   - component: {fileID: 270962526}
-  - component: {fileID: 919132147894461949}
   - component: {fileID: 270962532}
+  - component: {fileID: 919132147894461949}
   m_Layer: 7
   m_Name: BigfootCute
   m_TagString: Untagged
@@ -14531,7 +14483,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 919132147894461948}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b99895bc1d1c11945b85133f50d6f559, type: 3}
+  m_Script: {fileID: 11500000, guid: c03c2025ca044fd4aa9c8727903f581b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   maxSpeed: 3.25
@@ -14541,6 +14493,7 @@ MonoBehaviour:
   hands: {fileID: 0}
   throwForce: 300
   itemMassImpact: 0.1
+  tutorialEnabled: 0
 --- !u!137 &968951130500029029
 SkinnedMeshRenderer:
   m_ObjectHideFlags: 0

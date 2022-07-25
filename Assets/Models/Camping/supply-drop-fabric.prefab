@@ -12,10 +12,9 @@ GameObject:
   - component: {fileID: 9051138077797401577}
   - component: {fileID: 6519221498500134691}
   - component: {fileID: 5600640413285362592}
-  - component: {fileID: 7257697297473810785}
   m_Layer: 3
   m_Name: supply-drop-fabric
-  m_TagString: Untagged
+  m_TagString: Grab
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -97,16 +96,3 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: -792942304696094080, guid: eb70b4905ddffd44e9fc90b1fcd794bc, type: 3}
---- !u!114 &7257697297473810785
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4717539411571447542}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: acd1afaf7d3ab45b4903312d4c70d63a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  soundRange: 10

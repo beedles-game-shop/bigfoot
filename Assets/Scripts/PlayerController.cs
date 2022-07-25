@@ -23,6 +23,7 @@ public class PlayerController : MonoBehaviour
     private float modifierDuration = 0;
 
     //Booleans for tutorial prompts
+    public bool tutorialEnabled = false;
     private bool radioPrompted = false;
     private bool camperHinted = false;
     private bool obstacleHinted = false;
@@ -33,7 +34,10 @@ public class PlayerController : MonoBehaviour
     {
         rigidbody = GetComponent<Rigidbody>();
         animator = GetComponent<Animator>();
-        EventManager.TriggerEvent<ThoughtEvent, string, float>("Collect the items that I need without getting caught by the campers or rangers. We need to keep my existence a mystery!", 5.0f);
+        if (tutorialEnabled)
+        {
+            EventManager.TriggerEvent<ThoughtEvent, string, float>("Collect the items that I need without getting caught by the campers or rangers. We need to keep my existence a mystery!", 5.0f);
+        }
         currentSpeed = maxSpeed + speedModifier;
     }
 
@@ -147,7 +151,10 @@ public class PlayerController : MonoBehaviour
 
                 //Play the carry animation
                 animator.SetBool("carrying", true);
-                EventManager.TriggerEvent<ThoughtEvent, string, float>("Press the space bar again to throw the object. Throwing an object at a ranger or camper will only make them angry.", 3.0f);
+                if (tutorialEnabled)
+                {
+                    EventManager.TriggerEvent<ThoughtEvent, string, float>("Press the space bar again to throw the object. Throwing an object at a ranger or camper will only make them angry.", 3.0f);
+                }
                 return;
             }
 
@@ -156,10 +163,13 @@ public class PlayerController : MonoBehaviour
             {
                 EventManager.TriggerEvent<RadioEvent, GameObject>(reachableObjects[i].gameObject);
                 animator.SetBool("interacting", true);
-                if (!radioPrompted)
+                if (tutorialEnabled)
                 {
-                    EventManager.TriggerEvent<ThoughtEvent, string, float>("Radios will distract campers and rangers to their sound. They're hidden around each level, so make sure you explore!", 5.0f);
-                    radioPrompted = true;
+                    if (!radioPrompted)
+                    {
+                        EventManager.TriggerEvent<ThoughtEvent, string, float>("Radios will distract campers and rangers to their sound. They're hidden around each level, so make sure you explore!", 5.0f);
+                        radioPrompted = true;
+                    }
                 }
                 return;
             }
@@ -173,17 +183,26 @@ public class PlayerController : MonoBehaviour
     {
         Vector3 playerPosition = gameObject.transform.position;
 
-        // If the player is near the bench, trigger a speech bubble
-        if (other.gameObject.tag == "Bench" && !benchHinted)
+        if (tutorialEnabled)
         {
-            EventManager.TriggerEvent<ThoughtEvent, string, float>("We should check out the park bench, it looks like there might be something helpful there!", 2.0f);
-            benchHinted = true;
+            // If the player is near the bench, trigger a speech bubble
+            if (other.gameObject.tag == "Bench" && !benchHinted)
+            {
+                EventManager.TriggerEvent<ThoughtEvent, string, float>(
+                    "We should check out the park bench, it looks like there might be something helpful there!", 2.0f);
+                benchHinted = true;
+            }
         }
-        // If the player is near the radio, trigger a speech bubble
-        if (other.gameObject.tag == "Radio")
+
+        if (tutorialEnabled)
         {
-            EventManager.TriggerEvent<ThoughtEvent, string, float>("Press space to interact with radios or other objects.", 2.0f);
-            radioPrompted = true;
+            // If the player is near the radio, trigger a speech bubble
+            if (other.gameObject.tag == "Radio")
+            {
+                EventManager.TriggerEvent<ThoughtEvent, string, float>(
+                    "Press space to interact with radios or other objects.", 2.0f);
+                radioPrompted = true;
+            }
         }
 
         // If the player enters the cave while holding an object,
@@ -203,20 +222,29 @@ public class PlayerController : MonoBehaviour
             animator.SetBool("carrying", false);
         }
 
-        if (other.gameObject.tag == "ObstacleRadius" && !obstacleHinted)
+
+        if (tutorialEnabled)
         {
-            EventManager.TriggerEvent<ThoughtEvent, string, float>(" Be careful! Running into branches and rocks will slow you down & attract nearby rangers.", 3.0f);
+            if (other.gameObject.tag == "ObstacleRadius" && !obstacleHinted)
+            {
+                EventManager.TriggerEvent<ThoughtEvent, string, float>(
+                    " Be careful! Running into branches and rocks will slow you down & attract nearby rangers.", 3.0f);
+            }
         }
         if(other.gameObject.tag == "Obstacle")
         {
             EventManager.TriggerEvent<TripEvent, GameObject>(other.gameObject);
         }
-        if (other.gameObject.tag == "Campsite" && !camperHinted)
+
+        if (tutorialEnabled)
         {
+            if (other.gameObject.tag == "Campsite" && !camperHinted)
+            {
 
-            EventManager.TriggerEvent<ThoughtEvent, string, float>("Try to move quickly! If campers see you they will alert rangers to run over!", 3.0f);
-            camperHinted = true;
+                EventManager.TriggerEvent<ThoughtEvent, string, float>("Try to move quickly! If campers see you they will alert rangers to run over!", 3.0f);
+                camperHinted = true;
 
+            }
         }
     }
     //animation function to stop Bigfoot pointing at the radios/objects
@@ -229,7 +257,7 @@ public class PlayerController : MonoBehaviour
     public void SetSpeedModifier (float modifier, float duration)
     {
         // Do nothing if the current modifier is greater than the new one
-        if (speedModifier > modifier) return;
+        if (speedModifier >= modifier) return;
 
         speedModifier = modifier;
         modifierDuration = duration;

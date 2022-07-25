@@ -8,6 +8,13 @@ TagManager:
   - Cave
   - Bench
   - Radio
+  - Camper
+  - ObstacleRadius
+  - Obstacle
+  - Campsite
+  - bush
+  - twig
+  - Ground
   layers:
   - Default
   - TransparentFX
