@@ -2,8 +2,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-//Differene between this class and the tutorial is that there are less speech bubbles to guide the user.
-public class LevelPlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviour
 {
     public float maxSpeed = 3.25f;
     public float minSpeed = 1f;
@@ -20,19 +19,49 @@ public class LevelPlayerController : MonoBehaviour
     private new Rigidbody rigidbody;
     private Quaternion previousRot = Quaternion.identity;
     private float currentSpeed;
+    private float speedModifier = 0;
+    private float modifierDuration = 0;
+
+    //Booleans for tutorial prompts
+    public bool tutorialEnabled = false;
+    private bool radioPrompted = false;
+    private bool camperHinted = false;
+    private bool obstacleHinted = false;
+    private bool benchHinted = false;
 
     // Start is called before the first frame update
     void Start()
     {
         rigidbody = GetComponent<Rigidbody>();
         animator = GetComponent<Animator>();
-        EventManager.TriggerEvent<ThoughtEvent, string, float>("Use everything you've learned so far to pass!", 5.0f);
-        currentSpeed = maxSpeed;
+        if (tutorialEnabled)
+        {
+            EventManager.TriggerEvent<ThoughtEvent, string, float>("Collect the items that I need without getting caught by the campers or rangers. We need to keep my existence a mystery!", 5.0f);
+        }
+        else
+        {
+            // hack, need some initial thought event or else bubble stays forever
+            EventManager.TriggerEvent<ThoughtEvent, string, float>("o.o", 5.0f);
+        }
+        currentSpeed = maxSpeed + speedModifier;
     }
 
     // Called once at the end of every frame
     private void FixedUpdate()
     {
+        print(modifierDuration);
+        // Remove the speed modifier when the duration has passed
+        if (
+            modifierDuration > 0 &&
+            (modifierDuration -= Time.deltaTime) < 0
+        )
+        {
+            currentSpeed -= speedModifier;
+            maxSpeed -= speedModifier;
+            speedModifier = 0;
+            modifierDuration = 0;
+        }
+
         // Set the animation properties
         animator.SetFloat("velX", transform.rotation.y - previousRot.y);
         previousRot = transform.rotation;
@@ -127,6 +156,10 @@ public class LevelPlayerController : MonoBehaviour
 
                 //Play the carry animation
                 animator.SetBool("carrying", true);
+                if (tutorialEnabled)
+                {
+                    EventManager.TriggerEvent<ThoughtEvent, string, float>("Press the space bar again to throw the object. Throwing an object at a ranger or camper will only make them angry.", 3.0f);
+                }
                 return;
             }
 
@@ -135,6 +168,14 @@ public class LevelPlayerController : MonoBehaviour
             {
                 EventManager.TriggerEvent<RadioEvent, GameObject>(reachableObjects[i].gameObject);
                 animator.SetBool("interacting", true);
+                if (tutorialEnabled)
+                {
+                    if (!radioPrompted)
+                    {
+                        EventManager.TriggerEvent<ThoughtEvent, string, float>("Radios will distract campers and rangers to their sound. They're hidden around each level, so make sure you explore!", 5.0f);
+                        radioPrompted = true;
+                    }
+                }
                 return;
             }
         }
@@ -146,6 +187,28 @@ public class LevelPlayerController : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         Vector3 playerPosition = gameObject.transform.position;
+
+        if (tutorialEnabled)
+        {
+            // If the player is near the bench, trigger a speech bubble
+            if (other.gameObject.tag == "Bench" && !benchHinted)
+            {
+                EventManager.TriggerEvent<ThoughtEvent, string, float>(
+                    "We should check out the park bench, it looks like there might be something helpful there!", 2.0f);
+                benchHinted = true;
+            }
+        }
+
+        if (tutorialEnabled)
+        {
+            // If the player is near the radio, trigger a speech bubble
+            if (other.gameObject.tag == "Radio")
+            {
+                EventManager.TriggerEvent<ThoughtEvent, string, float>(
+                    "Press space to interact with radios or other objects.", 2.0f);
+                radioPrompted = true;
+            }
+        }
 
         // If the player enters the cave while holding an object,
         // drop the object and make it un-grabbable
@@ -164,11 +227,30 @@ public class LevelPlayerController : MonoBehaviour
             animator.SetBool("carrying", false);
         }
 
+
+        if (tutorialEnabled)
+        {
+            if (other.gameObject.tag == "ObstacleRadius" && !obstacleHinted)
+            {
+                EventManager.TriggerEvent<ThoughtEvent, string, float>(
+                    " Be careful! Running into branches and rocks will slow you down & attract nearby rangers.", 3.0f);
+            }
+        }
         if(other.gameObject.tag == "Obstacle")
         {
             EventManager.TriggerEvent<TripEvent, GameObject>(other.gameObject);
         }
 
+        if (tutorialEnabled)
+        {
+            if (other.gameObject.tag == "Campsite" && !camperHinted)
+            {
+
+                EventManager.TriggerEvent<ThoughtEvent, string, float>("Try to move quickly! If campers see you they will alert rangers to run over!", 3.0f);
+                camperHinted = true;
+
+            }
+        }
     }
     //animation function to stop Bigfoot pointing at the radios/objects
     public void StopPointing()
@@ -176,8 +258,16 @@ public class LevelPlayerController : MonoBehaviour
         animator.SetBool("interacting", false);
     }
 
-    private void OnAnimatorIK(int layerIndex)
+    // Sets the speed modifier and updates bigfoot's speed accordingly
+    public void SetSpeedModifier (float modifier, float duration)
     {
-        
+        // Do nothing if the current modifier is greater than the new one
+        if (speedModifier >= modifier) return;
+
+        speedModifier = modifier;
+        modifierDuration = duration;
+
+        currentSpeed += modifier;
+        maxSpeed += modifier;
     }
 }
