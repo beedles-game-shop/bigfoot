@@ -58,9 +58,9 @@ public class AudioEventManager : MonoBehaviour
 
         snd.audioSrc.Play();
 
-        ItemScript item = obj.GetComponent<ItemScript>();
+        var item = obj.GetComponent<EnvironmentSound>();
         if (item != null) {
-            item.alertNearestRanger();
+            item.EmitSoundEvent(obj.transform.position);
         }
     }
     void tripAudioEventHandler(GameObject obj)

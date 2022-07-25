@@ -105,7 +105,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3575479647253737317}
-  - component: {fileID: 5190239012428172431}
+  - component: {fileID: 1504933386982015541}
+  - component: {fileID: -5496663454608001920}
   m_Layer: 0
   m_Name: radio-camping
   m_TagString: Untagged
@@ -129,7 +130,20 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &5190239012428172431
+--- !u!65 &1504933386982015541
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4239425909553296863}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &-5496663454608001920
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -138,10 +152,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 4239425909553296863}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: acd1afaf7d3ab45b4903312d4c70d63a, type: 3}
+  m_Script: {fileID: 11500000, guid: e9a90d87d9d0a944ea50fbaa3a075b01, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  soundRange: 15
+  soundRadius: 50
+  targetMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!1 &6816818961393199957
 GameObject:
   m_ObjectHideFlags: 0

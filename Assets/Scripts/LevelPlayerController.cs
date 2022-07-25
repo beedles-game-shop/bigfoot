@@ -97,11 +97,6 @@ public class LevelPlayerController : MonoBehaviour
             heldObject.GetComponent<Rigidbody>().AddForce(movement);
             EventManager.TriggerEvent<ItemDropEvent>();
 
-            ItemScript item = heldObject.GetComponent<ItemScript>();
-            if (item != null) {
-                item.Thrown();
-            }
-            
             //Stop the grab animation
             animator.SetBool("carrying", false);
             return;
