@@ -123,12 +123,12 @@ public class CamperController : MonoBehaviour, SensorListener
                 if (vectorToTarget.magnitude - navAgent.stoppingDistance < 0.5f && !navAgent.pathPending)
                 {
                     Alert.State = Alert.States.None;
+                    navAgent.speed = 0.0f;
                     State = CamperState.AtSafeSpace;
                 }
                 break;
             case CamperState.AtSafeSpace:
                 animator.SetBool("scared", true);
-                navAgent.speed = 0.0f;
                 break;
             case CamperState.AtPointOfInterest:
                 animator.SetBool("scared", false);
@@ -148,6 +148,7 @@ public class CamperController : MonoBehaviour, SensorListener
                 {
                     Alert.State = Alert.States.None;
                     timeArrivedAtPOILocation = Time.realtimeSinceStartup;
+                    navAgent.speed = 0.0f;
                     State = CamperState.AtPointOfInterest;
                 }
 
@@ -158,6 +159,7 @@ public class CamperController : MonoBehaviour, SensorListener
                     && !navAgent.pathPending)
                 {
                     Alert.State = Alert.States.None;
+                    navAgent.speed = 0.0f;
                     State = CamperState.Idling;
                 }
 
@@ -213,11 +215,11 @@ public class CamperController : MonoBehaviour, SensorListener
                 alertNearestRanger();
                 ChooseFleeWaypoint(targetPosition);
                 navAgent.SetDestination(fleeWaypoint);
+                navAgent.speed = runSpeed;
                 EventManager.TriggerEvent<ThoughtEvent, string, float>("...!", 2.0f);
                 State = CamperState.Fleeing;
                 break;
             case CamperState.Fleeing:
-                navAgent.speed = runSpeed;
                 Vector3 vectorToTarget = fleeWaypoint - transform.position;
                 vectorToTarget.y = 0;
                 if (vectorToTarget.magnitude - navAgent.stoppingDistance < 0.5f && !navAgent.pathPending)

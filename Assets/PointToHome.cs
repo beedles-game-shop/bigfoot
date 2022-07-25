@@ -29,21 +29,21 @@ public class PointToHome : MonoBehaviour
 
         if (vectorToCave.x > 0 && vectorToCave.z > 0)
         {
-            print("Q1");
+            // print("Q1");
             yRotation *= -1;
         }
         else if (vectorToCave.x > 0 && vectorToCave.z < 0)
         {
-            print("Q4");
+            // print("Q4");
         }
         else if (vectorToCave.x < 0 && vectorToCave.z < 0)
         {
-            print("Q3");
+            // print("Q3");
             yRotation = 180 - yRotation;
         }
         else
         {
-            print("Q2");
+            // print("Q2");
             yRotation += 180;
         }
 

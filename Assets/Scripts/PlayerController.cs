@@ -49,7 +49,6 @@ public class PlayerController : MonoBehaviour
     // Called once at the end of every frame
     private void FixedUpdate()
     {
-        print(modifierDuration);
         // Remove the speed modifier when the duration has passed
         if (
             modifierDuration > 0 &&

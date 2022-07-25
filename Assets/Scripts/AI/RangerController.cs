@@ -128,18 +128,15 @@ public class RangerController : MonoBehaviour, SensorListener
                 }
                 break;
             case RangerState.Chasing:
-                navAgent.speed = runSpeed;
-
                 if (Time.realtimeSinceStartup - lastTimeSpottedSec > secondsToRemainAlerted)
                 {
                     Alert.State = Alert.States.None;
+                    navAgent.speed = walkSpeed;
                     State = RangerState.Patrolling;
                 }
 
                 break;
             case RangerState.Capturing:
-                navAgent.speed = runSpeed;
-
                 if (Time.realtimeSinceStartup - timeCaptureEnteredSec > captureTimeSec)
                 {
                     EventManager.TriggerEvent<FailedMenuEvent>();
@@ -151,6 +148,7 @@ public class RangerController : MonoBehaviour, SensorListener
                 if (Time.realtimeSinceStartup - lastTimeHeardSec > secondsToRemainAlerted)
                 {
                     Alert.State = Alert.States.None;
+                    navAgent.speed = walkSpeed;
                     State = RangerState.Patrolling;
                     break;
                 }
@@ -164,26 +162,26 @@ public class RangerController : MonoBehaviour, SensorListener
                 {
                     navAgent.SetDestination(pointOfInterest);
                     Alert.State = Alert.States.Question;
+                    navAgent.speed = runSpeed;
                     State = RangerState.MovingToPointOfInterest;
                 }
                 
                 break;
             case RangerState.MovingToPointOfInterest:
-                navAgent.speed = runSpeed;
-
-                Vector3 vectorToCall = pointOfInterest - transform.position;
+                Vector3 vectorToCall = navAgent.destination - transform.position;
                 vectorToCall.y = 0;
                 if (vectorToCall.magnitude - navAgent.stoppingDistance < 0.5f && !navAgent.pathPending)
                 {
                     timeArrivedAtPOILocation = Time.realtimeSinceStartup;
+                    navAgent.speed = 0.0f;
                     State = RangerState.AtPointOfInterest;
                 }
                 break;
             case RangerState.AtPointOfInterest:
-                navAgent.speed = 0.0f;
 
                 if (Time.realtimeSinceStartup - timeArrivedAtPOILocation > secondsToStayAtPOILocation)
                 {
+                    navAgent.speed = walkSpeed;
                     Alert.State = Alert.States.None;
                     State = RangerState.Patrolling;
                 }
@@ -252,6 +250,7 @@ public class RangerController : MonoBehaviour, SensorListener
                     EventManager.TriggerEvent<ThoughtEvent, string, float>("O.O", 2.0f);
                     Alert.State = Alert.States.Exclamation;
                     timeCaptureEnteredSec = Time.realtimeSinceStartup;
+                    navAgent.speed = runSpeed;
                     State = RangerState.Capturing;
                     break;
                 }
@@ -260,6 +259,7 @@ public class RangerController : MonoBehaviour, SensorListener
                 Alert.State = Alert.States.Exclamation;
                 lastTimeSpottedSec = Time.realtimeSinceStartup;
                 navAgent.SetDestination(targetPosition);
+                navAgent.speed = runSpeed;
                 State = RangerState.Chasing;
                 break;
             case RangerState.Capturing:
@@ -277,6 +277,7 @@ public class RangerController : MonoBehaviour, SensorListener
                     EventManager.TriggerEvent<ThoughtEvent, string, float>("...!", 2.0f);
                     timeCaptureEnteredSec = -1;
                     Alert.State = Alert.States.Exclamation;
+                    navAgent.speed = runSpeed;
                     State = RangerState.Chasing;
                     break;
                 }
@@ -335,6 +336,7 @@ public class RangerController : MonoBehaviour, SensorListener
             case RangerState.AtPointOfInterest:
                 EventManager.TriggerEvent<ThoughtEvent, string, float>("...", 2.0f);
                 navAgent.SetDestination(helpPosition);
+                navAgent.speed = runSpeed;
                 Alert.State = Alert.States.Question;
                 State = RangerState.MovingToPointOfInterest;
                 pointOfInterest = helpPosition;
