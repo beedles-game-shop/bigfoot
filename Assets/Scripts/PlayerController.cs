@@ -38,6 +38,11 @@ public class PlayerController : MonoBehaviour
         {
             EventManager.TriggerEvent<ThoughtEvent, string, float>("Collect the items that I need without getting caught by the campers or rangers. We need to keep my existence a mystery!", 5.0f);
         }
+        else
+        {
+            // hack, need some initial thought event or else bubble stays forever
+            EventManager.TriggerEvent<ThoughtEvent, string, float>("o.o", 5.0f);
+        }
         currentSpeed = maxSpeed + speedModifier;
     }
 
