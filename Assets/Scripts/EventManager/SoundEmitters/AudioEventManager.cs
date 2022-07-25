@@ -57,6 +57,11 @@ public class AudioEventManager : MonoBehaviour
         snd.audioSrc.volume = 0.8f;
 
         snd.audioSrc.Play();
+
+        var item = obj.GetComponent<EnvironmentSound>();
+        if (item != null) {
+            item.EmitSoundEvent(obj.transform.position);
+        }
     }
     void tripAudioEventHandler(GameObject obj)
     {
