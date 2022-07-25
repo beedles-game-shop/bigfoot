@@ -16,6 +16,7 @@ TagManager:
   - twig
   - Ground
   - Player
+  - WaypointArrow
   layers:
   - Default
   - TransparentFX
@@ -31,7 +32,7 @@ TagManager:
   - CarriedCollectable
   - PowerUp
   - 
-  - 
+  - WaypointArrow
   - 
   - 
   - 
