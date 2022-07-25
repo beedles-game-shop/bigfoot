@@ -40,7 +40,7 @@ public class AudioEventManager : MonoBehaviour
 
         snd.audioSrc.minDistance = 5f;
         snd.audioSrc.maxDistance = 100f;
-        snd.audioSrc.volume = 0.25f;
+        snd.audioSrc.volume = 0.02f;
 
         snd.audioSrc.Play();
         
@@ -57,6 +57,11 @@ public class AudioEventManager : MonoBehaviour
         snd.audioSrc.volume = 0.8f;
 
         snd.audioSrc.Play();
+
+        var item = obj.GetComponent<EnvironmentSound>();
+        if (item != null) {
+            item.EmitSoundEvent(obj.transform.position);
+        }
     }
     void tripAudioEventHandler(GameObject obj)
     {
