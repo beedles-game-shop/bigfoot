@@ -112,6 +112,7 @@ public class UIEventLoader : MonoBehaviour
         // If object is an item to collect
         if(collectImageMap.TryGetValue(key, out img)){
             EventManager.TriggerEvent<ThoughtEvent, string, float>("Let's go home! Press space again to throw an item. Items thrown at rangers can trigger, or distract them.", 5.0f);
+            GameObject.FindGameObjectWithTag("Player").GetComponent<ManageWaypointArrow>().ActivateArrow();
         }
 
         inventoryBlock.sprite = sprite;
@@ -120,6 +121,7 @@ public class UIEventLoader : MonoBehaviour
     void ItemDropHandler()
     {
         Debug.Log("ItemDropHandler");
+        GameObject.FindGameObjectWithTag("Player").GetComponent<ManageWaypointArrow>().DeactivateArrow();
         inventoryBlock.sprite = null;
     }
 
