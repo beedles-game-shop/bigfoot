@@ -15,6 +15,7 @@ TagManager:
   - bush
   - twig
   - Ground
+  - Player
   layers:
   - Default
   - TransparentFX
@@ -28,7 +29,7 @@ TagManager:
   - Ranger
   - Camera
   - CarriedCollectable
-  - 
+  - PowerUp
   - 
   - 
   - 
