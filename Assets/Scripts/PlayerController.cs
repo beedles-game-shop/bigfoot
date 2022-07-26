@@ -28,6 +28,7 @@ public class PlayerController : MonoBehaviour
     private bool camperHinted = false;
     private bool obstacleHinted = false;
     private bool benchHinted = false;
+    private bool marshmellowHinted = false;
 
     // Start is called before the first frame update
     void Start()
@@ -177,6 +178,7 @@ public class PlayerController : MonoBehaviour
                 }
                 return;
             }
+
         }
         
         EventManager.TriggerEvent<ThoughtEvent, string, float>("There isn't an object to carry.", 2.0f);
@@ -238,6 +240,12 @@ public class PlayerController : MonoBehaviour
         if(other.gameObject.tag == "Obstacle")
         {
             EventManager.TriggerEvent<TripEvent, GameObject>(other.gameObject);
+        }
+
+        if (other.gameObject.tag == "Marshmellow" && !marshmellowHinted)
+        {
+            EventManager.TriggerEvent<ThoughtEvent, string, float>("Those sparking objects are marshmellows! If you run over them, they'll provide a temporary speed boost.", 2.0f);
+            marshmellowHinted = true;
         }
 
         if (tutorialEnabled)
