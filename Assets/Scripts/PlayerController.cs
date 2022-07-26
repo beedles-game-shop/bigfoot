@@ -242,7 +242,7 @@ public class PlayerController : MonoBehaviour
             EventManager.TriggerEvent<TripEvent, GameObject>(other.gameObject);
         }
 
-        if (other.gameObject.tag == "Marshmellow" && !marshmellowHinted)
+        if (other.gameObject.tag == "Marshmellow" && !marshmellowHinted && tutorialEnabled)
         {
             EventManager.TriggerEvent<ThoughtEvent, string, float>("Those sparking objects are marshmellows! If you run over them, they'll provide a temporary speed boost.", 2.0f);
             marshmellowHinted = true;
@@ -257,6 +257,10 @@ public class PlayerController : MonoBehaviour
                 camperHinted = true;
 
             }
+        }
+        if (other.gameObject.tag == "Signpost")
+        {
+            EventManager.TriggerEvent<ThoughtEvent, string, float>("There might be something interesting down this path.", 2.0f);
         }
     }
     //animation function to stop Bigfoot pointing at the radios/objects

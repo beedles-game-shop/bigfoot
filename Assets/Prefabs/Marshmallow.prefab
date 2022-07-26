@@ -111,7 +111,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   modifier: 5
-  duration: 5
+  duration: 8
 --- !u!111 &7997839523147864760
 Animation:
   m_ObjectHideFlags: 0
