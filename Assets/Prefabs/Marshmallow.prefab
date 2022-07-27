@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 5775893928034324116}
   - component: {fileID: 1599868811261246244}
   - component: {fileID: 7997839523147864760}
-  m_Layer: 12
+  m_Layer: 0
   m_Name: Marshmallow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
