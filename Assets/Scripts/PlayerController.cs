@@ -28,21 +28,18 @@ public class PlayerController : MonoBehaviour
     private bool camperHinted = false;
     private bool obstacleHinted = false;
     private bool benchHinted = false;
+    private bool marshmellowHinted = false;
+    private bool interactionPrompted = false;
 
     // Start is called before the first frame update
     void Start()
     {
         rigidbody = GetComponent<Rigidbody>();
         animator = GetComponent<Animator>();
-        if (tutorialEnabled)
-        {
-            EventManager.TriggerEvent<ThoughtEvent, string, float>("Collect the items that I need without getting caught by the campers or rangers. We need to keep my existence a mystery!", 5.0f);
-        }
-        else
-        {
-            // hack, need some initial thought event or else bubble stays forever
-            EventManager.TriggerEvent<ThoughtEvent, string, float>("o.o", 5.0f);
-        }
+
+
+        EventManager.TriggerEvent<ThoughtEvent, string, float>("Collect the items that I need without getting caught by the campers or rangers. We need to keep my existence a mystery!", 5.0f);
+
         currentSpeed = maxSpeed + speedModifier;
     }
 
@@ -177,6 +174,7 @@ public class PlayerController : MonoBehaviour
                 }
                 return;
             }
+
         }
         
         EventManager.TriggerEvent<ThoughtEvent, string, float>("There isn't an object to carry.", 2.0f);
@@ -198,15 +196,12 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        if (tutorialEnabled)
+
+        // If the player is near the radio, trigger a speech bubble
+        if (other.gameObject.tag == "Radio" && tutorialEnabled && !interactionPrompted)
         {
-            // If the player is near the radio, trigger a speech bubble
-            if (other.gameObject.tag == "Radio")
-            {
-                EventManager.TriggerEvent<ThoughtEvent, string, float>(
-                    "Press space to interact with radios or other objects.", 2.0f);
-                radioPrompted = true;
-            }
+            EventManager.TriggerEvent<ThoughtEvent, string, float>("Press space to interact with radios or other objects.", 2.0f);
+            interactionPrompted = true;
         }
 
         // If the player enters the cave while holding an object,
@@ -240,6 +235,12 @@ public class PlayerController : MonoBehaviour
             EventManager.TriggerEvent<TripEvent, GameObject>(other.gameObject);
         }
 
+        if (other.gameObject.tag == "Marshmellow" && !marshmellowHinted && tutorialEnabled)
+        {
+            EventManager.TriggerEvent<ThoughtEvent, string, float>("Those sparking objects are marshmellows! If you run over them, they'll provide a temporary speed boost.", 4.0f);
+            marshmellowHinted = true;
+        }
+
         if (tutorialEnabled)
         {
             if (other.gameObject.tag == "Campsite" && !camperHinted)
@@ -249,6 +250,10 @@ public class PlayerController : MonoBehaviour
                 camperHinted = true;
 
             }
+        }
+        if (other.gameObject.tag == "Signpost")
+        {
+            EventManager.TriggerEvent<ThoughtEvent, string, float>("There might be something interesting down this path.", 2.0f);
         }
     }
     //animation function to stop Bigfoot pointing at the radios/objects

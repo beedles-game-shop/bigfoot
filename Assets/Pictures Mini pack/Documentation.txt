@@ -1,0 +1,19 @@
+Universal Rendering Pipeline. 
+
+--------
+
+This pack includes 3 pictures with artwork by Maria Sibylla Merian (1647-1717).
+
+--------
+
+Textures resolution: 2048x2048 (Albedo, MetallicSmoothness, Normal, AO). 
+Textures format: TGA.
+
+Unwrapped UVs:  channel 0: overlapping (for Albedo, Normal, Metallic, AO); channel 1: non-overlapping (for baking lightmaps).
+
+
+
+--------
+
+If you have any questions, please write me on e-mail.
+My e-mail: tatiana.gladkaya11@gmail.com

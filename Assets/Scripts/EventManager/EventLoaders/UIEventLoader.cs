@@ -53,12 +53,12 @@ public class UIEventLoader : MonoBehaviour
         spriteMap = new Dictionary<string, Sprite>(){
             {"cube", Resources.Load<Sprite>("Images/box")},
             {"ball", Resources.Load<Sprite>("Images/ball")},
-            {"chair", Resources.Load<Sprite>("Images/CampChair")},
+            {"chair-fishing-folding", Resources.Load<Sprite>("Images/CampChair")},
             {"table", Resources.Load<Sprite>("Images/table")},
             {"lantern-storm", Resources.Load<Sprite>("Images/lamp")},
-            {"picture", Resources.Load<Sprite>("Images/PictureFrame")},
+            {"picture-frame", Resources.Load<Sprite>("Images/PictureFrame")},
             {"box", Resources.Load<Sprite>("Images/crate")},
-            {"supply-drop-fabric", Resources.Load<Sprite>("Images/crate")}
+            {"supply-drop-fabric", Resources.Load<Sprite>("Images/crate")},
         };
 
         // Build Collection Goal Images
@@ -136,7 +136,7 @@ public class UIEventLoader : MonoBehaviour
         if(collectImageMap.TryGetValue(key, out img)){
             Debug.Log("collectible");
             collectImageMap.Remove(key);
-            img.color = new Color32(255,255,225,100);
+            img.color = new Color32(255,255,225,50);
         }
 
         // Check Win
