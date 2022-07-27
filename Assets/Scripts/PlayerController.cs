@@ -29,6 +29,7 @@ public class PlayerController : MonoBehaviour
     private bool obstacleHinted = false;
     private bool benchHinted = false;
     private bool marshmellowHinted = false;
+    private bool interactionPrompted = false;
 
     // Start is called before the first frame update
     void Start()
@@ -195,15 +196,12 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        if (tutorialEnabled)
+
+        // If the player is near the radio, trigger a speech bubble
+        if (other.gameObject.tag == "Radio" && tutorialEnabled && !interactionPrompted)
         {
-            // If the player is near the radio, trigger a speech bubble
-            if (other.gameObject.tag == "Radio")
-            {
-                EventManager.TriggerEvent<ThoughtEvent, string, float>(
-                    "Press space to interact with radios or other objects.", 2.0f);
-                radioPrompted = true;
-            }
+            EventManager.TriggerEvent<ThoughtEvent, string, float>("Press space to interact with radios or other objects.", 2.0f);
+            interactionPrompted = true;
         }
 
         // If the player enters the cave while holding an object,
@@ -239,7 +237,7 @@ public class PlayerController : MonoBehaviour
 
         if (other.gameObject.tag == "Marshmellow" && !marshmellowHinted && tutorialEnabled)
         {
-            EventManager.TriggerEvent<ThoughtEvent, string, float>("Those sparking objects are marshmellows! If you run over them, they'll provide a temporary speed boost.", 2.0f);
+            EventManager.TriggerEvent<ThoughtEvent, string, float>("Those sparking objects are marshmellows! If you run over them, they'll provide a temporary speed boost.", 4.0f);
             marshmellowHinted = true;
         }
 

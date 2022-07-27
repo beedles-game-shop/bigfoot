@@ -134,7 +134,7 @@ public class UIEventLoader : MonoBehaviour
         if(collectImageMap.TryGetValue(key, out img)){
             Debug.Log("collectible");
             collectImageMap.Remove(key);
-            img.color = new Color32(255,255,225,100);
+            img.color = new Color32(255,255,225,50);
         }
 
         // Check Win

@@ -255,7 +255,7 @@ public class RangerController : MonoBehaviour, SensorListener
                     break;
                 }
                 
-                EventManager.TriggerEvent<ThoughtEvent, string, float>("...!", 2.0f);
+                //EventManager.TriggerEvent<ThoughtEvent, string, float>("...!", 2.0f);
                 Alert.State = Alert.States.Exclamation;
                 lastTimeSpottedSec = Time.realtimeSinceStartup;
                 navAgent.SetDestination(targetPosition);
@@ -274,7 +274,7 @@ public class RangerController : MonoBehaviour, SensorListener
 
                 if (Vector3.Distance(targetPosition, transform.position) > captureDistance)
                 {
-                    EventManager.TriggerEvent<ThoughtEvent, string, float>("...!", 2.0f);
+                   //EventManager.TriggerEvent<ThoughtEvent, string, float>("...!", 2.0f);
                     timeCaptureEnteredSec = -1;
                     Alert.State = Alert.States.Exclamation;
                     navAgent.speed = runSpeed;
@@ -302,7 +302,7 @@ public class RangerController : MonoBehaviour, SensorListener
             case RangerState.Patrolling:
             case RangerState.AtPointOfInterest:
                 Alert.State = Alert.States.Question;
-                EventManager.TriggerEvent<ThoughtEvent, string, float>("...", 2.0f);
+                //EventManager.TriggerEvent<ThoughtEvent, string, float>("...", 2.0f);
                 State = RangerState.HeardSomething;
                 navAgent.speed = 0.0f;
                 lastHeard = sensorSound;
@@ -334,7 +334,7 @@ public class RangerController : MonoBehaviour, SensorListener
             case RangerState.Patrolling:
             case RangerState.MovingToPointOfInterest:
             case RangerState.AtPointOfInterest:
-                EventManager.TriggerEvent<ThoughtEvent, string, float>("...", 2.0f);
+                //EventManager.TriggerEvent<ThoughtEvent, string, float>("...", 2.0f);
                 navAgent.SetDestination(helpPosition);
                 navAgent.speed = runSpeed;
                 Alert.State = Alert.States.Question;

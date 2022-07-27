@@ -216,7 +216,7 @@ public class CamperController : MonoBehaviour, SensorListener
                 ChooseFleeWaypoint(targetPosition);
                 navAgent.SetDestination(fleeWaypoint);
                 navAgent.speed = runSpeed;
-                EventManager.TriggerEvent<ThoughtEvent, string, float>("...!", 2.0f);
+                //EventManager.TriggerEvent<ThoughtEvent, string, float>("...!", 2.0f);
                 State = CamperState.Fleeing;
                 break;
             case CamperState.Fleeing:
@@ -247,7 +247,7 @@ public class CamperController : MonoBehaviour, SensorListener
             case CamperState.AtSafeSpace:
             case CamperState.Idling:
                 Alert.State = Alert.States.Question;
-                EventManager.TriggerEvent<ThoughtEvent, string, float>("...", 2.0f);
+                //EventManager.TriggerEvent<ThoughtEvent, string, float>("...", 2.0f);
                 State = CamperState.HeardSomething;
                 navAgent.speed = 0.0f;
                 lastHeard = sensorSound;
