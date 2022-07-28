@@ -29,11 +29,13 @@ public class EnvironmentSound : MonoBehaviour
         if (collision.transform.gameObject.name == "Terrain")
         {
             EmitSoundEvent(collider.bounds.center);
+            EventManager.TriggerEvent<TripEvent, GameObject>(gameObject);
         }
     }
 
     public void EmitSoundEvent(Vector3 position)
     {
+        Debug.Log("Emitting Sound");
         var sensors = FindObjectsOfType<Sensor>().Where(sensor =>
             Vector3.Distance(transform.position, sensor.transform.position) < soundRadius);
         foreach (var sensor in sensors)
